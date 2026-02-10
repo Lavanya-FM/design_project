@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Artisan Blouse Gallery - TailorBrand{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+                <h1 class="text-2xl font-bold text-gray-800">TailorBrand</h1>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Collections</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">About</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">How it Works</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Contact</a>
+                </nav>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search collections..." 
+                           class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+                <button class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition">
+                    Book Consultation
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container mx-auto px-6 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar Filters -->
+        <aside class="lg:w-1/4">
+            <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                <h2 class="text-xl font-bold mb-6">Filters</h2>
+                
+                <!-- Fabric Type -->
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-3">FABRIC TYPE</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="fabric" value="All Fabrics" checked class="mr-2">
+                            <span>All Fabrics</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="fabric" value="Traditional Silks" class="mr-2">
+                            <span>Traditional Silks</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="fabric" value="Contemporary Cottons" class="mr-2">
+                            <span>Contemporary Cottons</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="fabric" value="Organza & Sheer" class="mr-2">
+                            <span>Organza & Sheer</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="fabric" value="Linen Blends" class="mr-2">
+                            <span>Linen Blends</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Occasion -->
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-3">OCCASION</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="occasion-tag px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-purple-600 hover:text-white hover:border-purple-600" data-occasion="Bridal">Bridal</button>
+                        <button class="occasion-tag px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-purple-600 hover:text-white hover:border-purple-600" data-occasion="Festive">Festive</button>
+                        <button class="occasion-tag px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-purple-600 hover:text-white hover:border-purple-600" data-occasion="Casual">Casual</button>
+                        <button class="occasion-tag px-3 py-1 border border-gray-300 rounded-full text-sm hover:bg-purple-600 hover:text-white hover:border-purple-600" data-occasion="Formal">Formal</button>
+                    </div>
+                </div>
+                
+                <button id="clearFilters" class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition">
+                    Clear All Filters
+                </button>
+                
+                <!-- Our Promise -->
+                <div class="mt-6 p-4 bg-purple-50 rounded-lg">
+                    <h4 class="font-semibold text-purple-900 mb-2">OUR PROMISE</h4>
+                    <p class="text-sm text-purple-700">Each design can be customized to your specific measurements and fabric preferences during your consultation.</p>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Gallery Content -->
+        <main class="lg:w-3/4">
+            <!-- Gallery Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-4">Artisan Blouse Gallery</h1>
+                <p class="text-gray-600 max-w-3xl">Explore our curated selection of bespoke blouse designs, from heritage hand-woven silks to contemporary minimalist cuts. Each piece is a testament to premium hand-crafted tailoring.</p>
+            </div>
+            
+            <!-- Blouse Grid -->
+            <div id="blouseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <!-- Blouse items will be loaded here via JavaScript -->
+            </div>
+            
+            <!-- The Art of the Stitch Section -->
+            <section class="bg-gray-50 rounded-lg p-8 mb-8">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">The Art of the Stitch</h2>
+                        <p class="text-gray-600 mb-6">At TailorBrand, we believe a blouse is more than just a garment; it's the anchor of your ensemble. Our master tailors bring over three decades of experience to every cut and every stitch. From the precise placement of a dart to the hand-finished edging of a neckline, our craftsmanship is obsessed with the details that define luxury.</p>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-purple-600">15+</div>
+                                <div class="text-sm text-gray-600">MASTER TAILORS</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-purple-600">100%</div>
+                                <div class="text-sm text-gray-600">CUSTOM FIT</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-purple-600">48h</div>
+                                <div class="text-sm text-gray-600">CONSULTATION TURNAROUND</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <img src="https://picsum.photos/seed/tailorcraft/400/300.jpg" alt="Craftsmanship" class="rounded-lg shadow-md">
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white">
+    <div class="container mx-auto px-6 py-12">
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="col-span-1">
+                <h3 class="text-xl font-bold mb-4">TailorBrand</h3>
+                <p class="text-gray-400 mb-4">Redefining traditional tailoring for the modern woman. Experience the luxury of a perfect fit.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-pinterest"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Explore</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white">New Arrivals</a></li>
+                    <li><a href="#" class="hover:text-white">Best Sellers</a></li>
+                    <li><a href="#" class="hover:text-white">Gift Cards</a></li>
+                    <li><a href="#" class="hover:text-white">Sizing Guide</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Support</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white">Shipping & Returns</a></li>
+                    <li><a href="#" class="hover:text-white">Care Instructions</a></li>
+                    <li><a href="#" class="hover:text-white">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-white">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>© 2024 TailorBrand Bespoke. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    loadBlouses();
+    
+    // Handle fabric filter changes
+    $('input[name="fabric"]').change(function() {
+        loadBlouses();
+    });
+    
+    // Handle occasion tag clicks
+    $('.occasion-tag').click(function() {
+        $(this).toggleClass('bg-purple-600 text-white border-purple-600');
+        loadBlouses();
+    });
+    
+    // Clear filters
+    $('#clearFilters').click(function() {
+        $('input[name="fabric"][value="All Fabrics"]').prop('checked', true);
+        $('.occasion-tag').removeClass('bg-purple-600 text-white border-purple-600');
+        loadBlouses();
+    });
+});
+
+function loadBlouses() {
+    const fabricType = $('input[name="fabric"]:checked').val();
+    const selectedOccasions = $('.occasion-tag.bg-purple-600').map(function() {
+        return $(this).data('occasion');
+    }).get();
+    
+    let url = '/api/blouses';
+    const params = new URLSearchParams();
+    
+    if (fabricType && fabricType !== 'All Fabrics') {
+        params.append('fabric_type', fabricType);
+    }
+    
+    if (selectedOccasions.length > 0) {
+        params.append('occasion', selectedOccasions.join(','));
+    }
+    
+    if (params.toString()) {
+        url += '?' + params.toString();
+    }
+    
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(blouses) {
+            renderBlouses(blouses);
+        },
+        error: function() {
+            $('#blouseGrid').html('<p class="text-center text-gray-500">Error loading blouses. Please try again.</p>');
+        }
+    });
+}
+
+function renderBlouses(blouses) {
+    const grid = $('#blouseGrid');
+    grid.empty();
+    
+    if (blouses.length === 0) {
+        grid.html('<p class="text-center text-gray-500 col-span-full">No blouses found matching your criteria.</p>');
+        return;
+    }
+    
+    // Sample data for demonstration
+    const sampleBlouses = [
+        {
+            id: 1,
+            title: "Traditional Silks",
+            description: "Rich Banarasi and Kanjeevaram textures adorned with meticulous Zardozi handwork.",
+            image_url: "https://picsum.photos/seed/silk1/300/400.jpg"
+        },
+        {
+            id: 2,
+            title: "Contemporary Cottons",
+            description: "Breathable, organic weaves featuring modern silhouettes and understated wooden button details.",
+            image_url: "https://picsum.photos/seed/cotton1/300/400.jpg"
+        },
+        {
+            id: 3,
+            title: "Designer Backs",
+            description: "A focus on the unexpected. Geometric cut-outs, tie-up latkans, and sheer panelling.",
+            image_url: "https://picsum.photos/seed/designer1/300/400.jpg"
+        },
+        {
+            id: 4,
+            title: "Ethereal Organza",
+            description: "Light-as-air fabrics paired with delicate floral appliques and glass bead embroidery.",
+            image_url: "https://picsum.photos/seed/organza1/300/400.jpg"
+        },
+        {
+            id: 5,
+            title: "Velvet Nights",
+            description: "Rich, plush velvets in jewel tones, perfect for winter weddings and grand galas.",
+            image_url: "https://picsum.photos/seed/velvet1/300/400.jpg"
+        },
+        {
+            id: 6,
+            title: "Indigo Tales",
+            description: "Hand-block printed Ajrakh and Dabu cottons celebrating ancient dyeing traditions.",
+            image_url: "https://picsum.photos/seed/indigo1/300/400.jpg"
+        }
+    ];
+    
+    const blousesToRender = blouses.length > 0 ? blouses : sampleBlouses;
+    
+    blousesToRender.forEach(function(blouse) {
+        const blouseCard = `
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition duration-300">
+                <img src="${blouse.image_url}" alt="${blouse.title}" class="w-full h-64 object-cover">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold mb-2">${blouse.title}</h3>
+                    <p class="text-gray-600 mb-4">${blouse.description}</p>
+                    <button class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition" onclick="viewDetails(${blouse.id})">
+                        View Details
+                    </button>
+                </div>
+            </div>
+        `;
+        grid.append(blouseCard);
+    });
+}
+
+function viewDetails(blouseId) {
+    alert('View details for blouse ID: ' + blouseId + '. This would open a detailed view modal or page.');
+}
+</script>
+{% endblock %}

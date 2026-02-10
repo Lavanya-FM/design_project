@@ -1,0 +1,562 @@
+/* ========================================
+   VENDOR / FABRIC DASHBOARD
+   ======================================== */
+
+.vendor-dashboard {
+    display: flex;
+    min-height: 100vh;
+    padding-top: 70px;
+    background: var(--pastel-ivory);
+}
+
+.vendor-sidebar {
+    width: 280px;
+    background: white;
+    border-right: 1px solid var(--color-border);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 70px;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.03);
+}
+
+.vendor-main {
+    flex: 1;
+    padding: 32px 40px;
+    overflow-y: auto;
+}
+
+.vendor-content-section {
+    animation: fadeIn 0.3s ease;
+}
+
+.section-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+}
+
+.section-top-bar h1 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--color-secondary);
+    margin-bottom: 4px;
+}
+
+.section-top-bar p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Catalog Filters */
+.catalog-filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.search-bar-small {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    padding: 8px 16px;
+    min-width: 240px;
+}
+
+.search-bar-small input {
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    flex: 1;
+    background: transparent;
+}
+
+.type-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    padding: 8px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: white;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--color-text-light);
+    transition: all var(--transition-fast);
+}
+
+.filter-chip:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.filter-chip.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* Fabric Grid */
+.fabric-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.fabric-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-smooth);
+    border: 2px solid transparent;
+}
+
+.fabric-card:hover {
+    border-color: var(--pastel-pink);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+}
+
+.fabric-img-wrap {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+}
+
+.fabric-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-smooth);
+}
+
+.fabric-card:hover .fabric-img-wrap img {
+    transform: scale(1.05);
+}
+
+.stock-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 700;
+    backdrop-filter: blur(6px);
+}
+
+.stock-badge.in-stock {
+    background: var(--color-success-light);
+    color: var(--color-success);
+}
+
+.stock-badge.low-stock {
+    background: var(--color-warning-light);
+    color: var(--color-warning);
+}
+
+.stock-badge.out-of-stock {
+    background: var(--color-error-light);
+    color: var(--color-error);
+}
+
+.fabric-details {
+    padding: 18px;
+}
+
+.fabric-details h4 {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+    color: var(--color-secondary);
+}
+
+.fabric-meta {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.fabric-type {
+    background: var(--pastel-lavender);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    color: #6C5B7B;
+    font-weight: 600;
+}
+
+.fabric-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 14px;
+}
+
+.stock-val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-secondary);
+}
+
+.stock-unit {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-left: 4px;
+}
+
+.fabric-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.fabric-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.fabric-actions .btn {
+    flex: 1;
+    text-align: center;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px 0;
+}
+
+.modal-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 24px 28px;
+}
+
+.modal-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.modal-form-grid .form-group {
+    margin-bottom: 0;
+}
+
+.modal-form-grid label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    margin-bottom: 6px;
+}
+
+.modal-form-grid select.form-input {
+    appearance: none;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 28px 24px;
+}
+
+/* Vendor Table */
+.requests-table-wrap {
+    overflow-x: auto;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.vendor-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.vendor-table th {
+    text-align: left;
+    padding: 14px 18px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    border-bottom: 2px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.vendor-table td {
+    padding: 14px 18px;
+    font-size: 0.88rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: var(--color-text);
+}
+
+.vendor-table tbody tr:hover {
+    background: var(--pastel-ivory);
+}
+
+.urgency-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-pill.pending {
+    background: var(--color-warning-light);
+    color: var(--color-warning);
+}
+
+.status-pill.dispatched {
+    background: var(--color-success-light);
+    color: var(--color-success);
+}
+
+/* Pricing Slabs */
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.pricing-slab-card {
+    background: white;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    text-align: center;
+    transition: transform var(--transition-fast);
+}
+
+.pricing-slab-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.slab-range {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+}
+
+.slab-discount {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 6px;
+}
+
+.slab-note {
+    font-size: 0.82rem;
+    color: var(--color-text-light);
+}
+
+.pricing-note-box {
+    background: var(--pastel-cream);
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(247, 231, 206, 0.5);
+}
+
+.pricing-note-box h4 {
+    margin-bottom: 8px;
+}
+
+.pricing-note-box p {
+    font-size: 0.88rem;
+    color: var(--color-text-light);
+    line-height: 1.6;
+}
+
+/* Analytics */
+.analytics-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.analytics-card {
+    background: white;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.analytics-icon {
+    font-size: 2.2rem;
+}
+
+.analytics-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    color: var(--color-secondary);
+    margin-bottom: 2px;
+}
+
+.analytics-card p {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.top-fabrics-section {
+    background: white;
+    padding: 28px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.top-fabrics-section h3 {
+    font-family: var(--font-heading);
+    margin-bottom: 20px;
+}
+
+.top-fabric-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.top-fabric-item:last-child {
+    border: none;
+}
+
+.rank {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    width: 40px;
+}
+
+.tf-name {
+    flex: 1;
+    font-weight: 600;
+}
+
+.tf-orders {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.tf-revenue {
+    font-weight: 700;
+    color: var(--color-success);
+}
+
+/* Shared small button */
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    border-radius: var(--radius-pill);
+}
+
+.btn-block {
+    width: 100%;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .vendor-dashboard {
+        flex-direction: column;
+    }
+
+    .vendor-sidebar {
+        width: 100%;
+        position: static;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .vendor-main {
+        padding: 20px;
+    }
+
+    .fabric-catalog-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-cards {
+        grid-template-columns: 1fr;
+    }
+}

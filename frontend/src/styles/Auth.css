@@ -1,0 +1,247 @@
+/* ========================================
+   AUTHENTICATION & ROLE SELECTION
+   ======================================== */
+
+.auth-page {
+    min-height: 100vh;
+    padding-top: 100px;
+    padding-bottom: 60px;
+    background: var(--pastel-ivory);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 1100px;
+    padding: 0 20px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.auth-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.8rem;
+    color: var(--color-secondary);
+    margin-bottom: 12px;
+}
+
+.auth-header p {
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+}
+
+/* Role Selection Grid */
+.role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+}
+
+.role-card {
+    background: white;
+    padding: 40px 24px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    cursor: pointer;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.role-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border-color: var(--pastel-pink);
+}
+
+.role-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.role-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: var(--color-secondary);
+    margin-bottom: 12px;
+}
+
+.role-card p {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    flex: 1;
+    margin-bottom: 24px;
+}
+
+.btn-role {
+    width: 100%;
+    padding: 12px;
+    background: var(--color-surface);
+    color: var(--color-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.role-card:hover .btn-role {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* Specialized Login Form Layout */
+.auth-form-card {
+    background: white;
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 48px;
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-form-card.customer {
+    border-top: 6px solid var(--color-primary);
+}
+
+.auth-form-card.designer {
+    border-top: 6px solid #6c5ce7;
+}
+
+.auth-form-card.tailor {
+    border-top: 6px solid #00b894;
+}
+
+.auth-form-card.vendor {
+    border-top: 6px solid #e17055;
+}
+
+.auth-form-card.admin {
+    border-top: 6px solid #2d3436;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.badge-customer {
+    background: var(--pastel-pink);
+    color: var(--color-primary);
+}
+
+.badge-designer {
+    background: #efeefd;
+    color: #6c5ce7;
+}
+
+.badge-tailor {
+    background: #e6fffb;
+    color: #00b894;
+}
+
+.badge-vendor {
+    background: #fff1e6;
+    color: #e17055;
+}
+
+.badge-admin {
+    background: #f1f2f6;
+    color: #2d3436;
+}
+
+.auth-form h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.auth-form p.tagline {
+    color: var(--color-text-muted);
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+}
+
+/* Guest / OTP Options */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0;
+    color: #ccc;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #eee;
+}
+
+.divider::before {
+    margin-right: 15px;
+}
+
+.divider::after {
+    margin-left: 15px;
+}
+
+.btn-outline-auth {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline-auth:hover {
+    background: #fdfdfd;
+    border-color: var(--color-text-muted);
+}
+
+.auth-footer {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.auth-footer a {
+    color: var(--color-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@media (max-width: 600px) {
+    .auth-form-card {
+        padding: 32px 24px;
+    }
+
+    .auth-header h1 {
+        font-size: 2.2rem;
+    }
+}

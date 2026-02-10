@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Fit & Flare Studio - Bespoke Blouse Design{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="bg-white shadow-sm">
+    <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div class="text-2xl font-bold text-gray-800">FIT & FLARE STUDIO</div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#" class="text-gray-600 hover:text-gray-900">Home</a>
+                <a href="/gallery" class="text-gray-600 hover:text-gray-900">Collections</a>
+                <a href="#" class="text-gray-600 hover:text-gray-900">How It Works</a>
+            </nav>
+            <a href="/login" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
+                Book a Consultation
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-r from-orange-50 to-pink-50 py-20">
+    <div class="container mx-auto px-6">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    The Perfect Fit, Tailored for You
+                </h1>
+                <p class="text-xl text-gray-600 mb-8">
+                    Exquisite bespoke blouses designed to celebrate your silhouette. Experience the luxury of garments crafted specifically for your story.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="/login" class="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition">
+                        Book a Consultation
+                    </a>
+                    <a href="/gallery" class="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold border border-red-600 hover:bg-red-50 transition">
+                        View Lookbook
+                    </a>
+                </div>
+            </div>
+            <div class="flex justify-center">
+                <img src="https://picsum.photos/seed/blouse1/500/600.jpg" alt="Orange Blouse" class="rounded-lg shadow-xl">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Signature Styles Section -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Signature Styles</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                From formal sophistication to contemporary daily wear, discover the silhouettes that define modern elegance.
+            </p>
+            <a href="/gallery" class="text-purple-600 hover:text-purple-800 font-semibold">
+                Explore All Designs →
+            </a>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <img src="https://picsum.photos/seed/classic1/300/400.jpg" alt="Classic Silhouettes" class="rounded-lg shadow-md mb-4 mx-auto">
+                <h3 class="text-xl font-semibold mb-2">Classic Silhouettes</h3>
+                <p class="text-gray-600">Timeless designs that never go out of style</p>
+            </div>
+            <div class="text-center">
+                <img src="https://picsum.photos/seed/modern1/300/400.jpg" alt="Modern Chic" class="rounded-lg shadow-md mb-4 mx-auto">
+                <h3 class="text-xl font-semibold mb-2">Modern Chic</h3>
+                <p class="text-gray-600">Contemporary styles for the modern woman</p>
+            </div>
+            <div class="text-center">
+                <img src="https://picsum.photos/seed/artisan1/300/400.jpg" alt="Artisan Detail" class="rounded-lg shadow-md mb-4 mx-auto">
+                <h3 class="text-xl font-semibold mb-2">Artisan Detail</h3>
+                <p class="text-gray-600">Handcrafted excellence in every stitch</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Process Section -->
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-6">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Process</h2>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-purple-600">01</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Consult</h3>
+                <p class="text-gray-600">Virtual or in-person measurement session to understand your unique shape and style preferences.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-purple-600">02</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Design</h3>
+                <p class="text-gray-600">Selection of premium fabrics and custom pattern drafting by our master tailors.</p>
+            </div>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-2xl font-bold text-purple-600">03</span>
+                </div>
+                <h3 class="text-xl font-semibold mb-2">Deliver</h3>
+                <p class="text-gray-600">The final garment is hand-finished, pressed, and delivered to your doorstep for a perfect fit.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-20 bg-red-600">
+    <div class="container mx-auto px-6 text-center">
+        <h2 class="text-3xl font-bold text-white mb-4">Ready for your master-fit?</h2>
+        <p class="text-xl text-red-100 mb-8 max-w-2xl mx-auto">
+            Join hundreds of women who have found their perfect fit. Let us create something timeless just for you.
+        </p>
+        <a href="/login" class="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-red-50 transition">
+            Schedule Your Session
+        </a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-900 text-white">
+    <div class="container mx-auto px-6 py-12">
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="col-span-1">
+                <h3 class="text-xl font-bold mb-4">FIT & FLARE</h3>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-pinterest"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Studio</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="/gallery" class="hover:text-white">Collections</a></li>
+                    <li><a href="#" class="hover:text-white">Our Story</a></li>
+                    <li><a href="#" class="hover:text-white">Boutique Locations</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Support</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="/login" class="hover:text-white">Consultations</a></li>
+                    <li><a href="#" class="hover:text-white">Shipping & Fitting</a></li>
+                    <li><a href="#" class="hover:text-white">Care Guide</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>© 2024 Fit & Flare Studio. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+{% endblock %}

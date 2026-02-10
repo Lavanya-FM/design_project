@@ -1,0 +1,74 @@
+:root {
+  /* Brand Colors — Fit & Flare Studio */
+  --color-primary: #D02F44;
+  --color-primary-dark: #A81B2E;
+  --color-primary-light: #FF6B81;
+  --color-secondary: #1C1C1C;
+  --color-accent: #F4EBE8;
+  --color-text: #333333;
+  --color-text-light: #666666;
+  --color-text-muted: #999999;
+  --color-background: #FFFFFF;
+  --color-surface: #FAFAFA;
+  --color-border: #E5E5E5;
+
+  /* Pastel Palette — Indian Fashion Aesthetic */
+  --pastel-ivory: #FDF8F0;
+  --pastel-blush: #FFF0F3;
+  --pastel-pink: #FFE4EC;
+  --pastel-sage: #E8F0E8;
+  --pastel-lavender: #F0EBF7;
+  --pastel-cream: #FFF8E7;
+  --pastel-mint: #E0F2ED;
+  --pastel-rose: #FDE2E4;
+  --pastel-gold: #F7E7CE;
+  --pastel-champagne: #F5F0E8;
+
+  /* Status Colors */
+  --color-success: #27AE60;
+  --color-success-light: #E8F8EF;
+  --color-warning: #F39C12;
+  --color-warning-light: #FFF8E7;
+  --color-error: #E74C3C;
+  --color-error-light: #FFEBEE;
+  --color-info: #3498DB;
+  --color-info-light: #EBF5FB;
+
+  /* Typography */
+  --font-heading: 'Playfair Display', 'Georgia', serif;
+  --font-body: 'Lato', 'Segoe UI', sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 64px;
+  --spacing-giant: 96px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 30px rgba(208, 47, 68, 0.12);
+  --shadow-card: 0 2px 20px rgba(0, 0, 0, 0.04);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 50px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-blur: blur(12px);
+}
