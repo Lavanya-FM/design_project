@@ -99,6 +99,10 @@ code {
   animation: fadeIn 0.8s ease forwards;
 }
 
+.animate-me {
+  animation: fadeIn 1s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
 .section-title {
   position: relative;
   display: inline-block;

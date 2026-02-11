@@ -6,7 +6,8 @@
 /* Hero Section */
 .hero-section {
     height: 100vh;
-    background: url('https://images.unsplash.com/photo-1581044777550-4cfa60707c33?w=1600') center/cover no-repeat;
+    min-height: 800px;
+    background: url('https://images.unsplash.com/photo-1590736704044-672584a39005?w=1600') center/cover no-repeat;
     position: relative;
     display: flex;
     align-items: center;
@@ -16,51 +17,78 @@
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.7), transparent);
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+    z-index: 1;
 }
 
 .hero-content {
     position: relative;
     z-index: 2;
-    max-width: 800px;
+    max-width: 850px;
 }
 
 .hero-badge {
     display: inline-block;
-    padding: 8px 20px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 24px;
+    background: rgba(208, 47, 68, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(208, 47, 68, 0.3);
     border-radius: var(--radius-pill);
-    font-size: 0.75rem;
-    font-weight: 800;
+    font-size: 0.72rem;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 24px;
+    letter-spacing: 2.5px;
+    margin-bottom: 32px;
+    color: var(--color-primary-light);
 }
 
 .hero-content h1 {
     font-family: var(--font-heading);
-    font-size: 4.5rem;
-    line-height: 1.1;
-    margin-bottom: 24px;
+    font-size: clamp(3.5rem, 8vw, 5.5rem);
+    line-height: 1.05;
+    margin-bottom: 28px;
+    font-weight: 800;
 }
 
 .hero-content h1 span {
-    color: var(--color-primary);
+    color: var(--color-primary-light);
     font-style: italic;
+    font-weight: 400;
 }
 
 .hero-content p {
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 40px;
+    font-size: 1.35rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 48px;
     line-height: 1.6;
+    max-width: 650px;
+    font-weight: 400;
 }
 
 .hero-actions {
     display: flex;
-    gap: 20px;
+    gap: 24px;
+}
+
+.btn-lg {
+    padding: 18px 44px;
+    font-size: 1.05rem;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.btn-outline-white {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+.btn-outline-white:hover {
+    background: white;
+    color: var(--color-secondary);
 }
 
 .hero-scroll-indicator {
@@ -80,9 +108,35 @@
 
 .mouse {
     width: 24px;
-    height: 40px;
-    border: 2px solid white;
+    height: 38px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
     border-radius: 12px;
+    position: relative;
+}
+
+.mouse::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    animation: scrollWheel 2s infinite;
+}
+
+@keyframes scrollWheel {
+    0% {
+        top: 8px;
+        opacity: 1;
+    }
+
+    100% {
+        top: 24px;
+        opacity: 0;
+    }
 }
 
 /* Featured Carousel */
@@ -172,17 +226,19 @@
 
 .stat-num {
     font-family: var(--font-heading);
-    font-size: 3rem;
-    color: var(--color-secondary);
+    font-size: 3.5rem;
+    color: var(--color-primary);
     line-height: 1;
+    font-weight: 800;
 }
 
 .stat-label {
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--color-text-muted);
+    letter-spacing: 2px;
+    color: var(--color-secondary);
+    opacity: 0.6;
 }
 
 .stat-item.divider {
@@ -199,10 +255,26 @@
 .guarantee-card {
     display: grid;
     grid-template-columns: 1fr 300px;
-    padding: 80px;
+    padding: 100px;
     align-items: center;
     background: white;
-    border-radius: 40px;
+    border-radius: 48px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    position: relative;
+    overflow: hidden;
+}
+
+.guarantee-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background: linear-gradient(to right, transparent, var(--pastel-blush));
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .guarantee-info h2 {

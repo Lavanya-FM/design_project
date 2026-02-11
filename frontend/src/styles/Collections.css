@@ -17,14 +17,17 @@
 
 /* Sidebar Navigation */
 .filters-sidebar {
-    background: white;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     padding: 32px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
     height: sticky;
     top: 120px;
-    border: 1px solid rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
     position: sticky;
+    z-index: 50;
 }
 
 .sidebar-header {
@@ -45,12 +48,22 @@
 }
 
 .filter-cat-title {
-    font-size: 0.75rem;
-    font-weight: 800;
+    font-size: 0.72rem;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     color: var(--color-text-muted);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-cat-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, #eee, transparent);
 }
 
 .filter-visual-grid {
@@ -63,40 +76,44 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
-    transition: all 0.3s;
-    padding: 10px;
-    border-radius: 12px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 12px 8px;
+    border-radius: 16px;
     border: 1px solid transparent;
 }
 
 .visual-pill:hover {
-    background: #fdf2f3;
+    background: rgba(208, 47, 68, 0.04);
+    transform: translateY(-2px);
 }
 
 .visual-pill.active {
-    background: #fdf2f3;
+    background: white;
     border-color: var(--color-primary);
+    box-shadow: 0 8px 15px rgba(208, 47, 68, 0.08);
 }
 
 .pill-img-wrap {
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.06);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .visual-pill:hover .pill-img-wrap {
-    transform: scale(1.1);
+    transform: scale(1.15) rotate(3deg);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .visual-pill.active .pill-img-wrap {
     border-color: var(--color-primary);
-    transform: scale(1.05);
+    transform: scale(1.1) rotate(-3deg);
+    box-shadow: var(--shadow-glow);
 }
 
 .pill-img-wrap img {

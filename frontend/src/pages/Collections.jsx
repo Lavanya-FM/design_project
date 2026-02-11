@@ -10,44 +10,44 @@ import { useSocket } from '../components/SocketContext';
 
 const FILTER_CATEGORIES = {
     neck: [
-        { label: 'Deep U', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=100&h=100&fit=crop' },
-        { label: 'V Neck', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=100&h=100&fit=crop' },
-        { label: 'Sweetheart', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=100&h=100&fit=crop' },
+        { label: 'Deep U', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=100&h=100&fit=crop' },
+        { label: 'V Neck', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=100&h=100&fit=crop' },
+        { label: 'Sweetheart', img: 'https://images.unsplash.com/photo-1594144400267-0ef6d628795c?w=100&h=100&fit=crop' },
         { label: 'Boat Neck', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=100&h=100&fit=crop' },
-        { label: 'Deep Round', img: 'https://images.unsplash.com/photo-1531995811006-35cb42e1a022?w=100&h=100&fit=crop' },
-        { label: 'Pot Neck', img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=100&h=100&fit=crop' },
-        { label: 'Keyhole', img: 'https://images.unsplash.com/photo-1533038590840-1cde6e56f40f?w=100&h=100&fit=crop' },
-        { label: 'High Neck', img: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=100&h=100&fit=crop' }
+        { label: 'Deep Round', img: 'https://images.unsplash.com/photo-1610030488171-80ca3602be71?w=100&h=100&fit=crop' },
+        { label: 'Pot Neck', img: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=100&h=100&fit=crop' },
+        { label: 'Keyhole', img: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=100&h=100&fit=crop' },
+        { label: 'High Neck', img: 'https://images.unsplash.com/photo-1551048632-24e237311d01?w=100&h=100&fit=crop' }
     ],
     sleeve: [
         { label: 'Sleeveless', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=100&h=100&fit=crop' },
-        { label: 'Short Sleeves', img: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=100&h=100&fit=crop' },
+        { label: 'Short Sleeves', img: 'https://images.unsplash.com/photo-1594144400267-0ef6d628795c?w=100&h=100&fit=crop' },
         { label: 'Elbow Length', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=100&h=100&fit=crop' },
-        { label: 'Full Sleeves', img: 'https://images.unsplash.com/photo-1604176354204-926873ff34b1?w=100&h=100&fit=crop' }
+        { label: 'Full Sleeves', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=100&h=100&fit=crop' }
     ],
     fabric: [
-        { label: 'Silk', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=100&h=100&fit=crop' },
+        { label: 'Silk', img: 'https://images.unsplash.com/photo-1610030488171-80ca3602be71?w=100&h=100&fit=crop' },
         { label: 'Velvet', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=100&h=100&fit=crop' },
-        { label: 'Cotton Silk', img: 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?w=100&h=100&fit=crop' },
-        { label: 'Net/Lace', img: 'https://images.unsplash.com/photo-1551048632-24e237311d01?w=100&h=100&fit=crop' },
-        { label: 'Brocade', img: 'https://images.unsplash.com/photo-1445205170230-053b830c6050?w=100&h=100&fit=crop' }
+        { label: 'Cotton Silk', img: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=100&h=100&fit=crop' },
+        { label: 'Net/Lace', img: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=100&h=100&fit=crop' },
+        { label: 'Brocade', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=100&h=100&fit=crop' }
     ],
     border: [
-        { label: 'Zari Border', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=100&h=100&fit=crop' },
+        { label: 'Zari Border', img: 'https://images.unsplash.com/photo-1551048632-24e237311d01?w=100&h=100&fit=crop' },
         { label: 'Temple Border', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=100&h=100&fit=crop' },
-        { label: 'Cutwork', img: 'https://images.unsplash.com/photo-1533038590840-1cde6e56f40f?w=100&h=100&fit=crop' },
-        { label: 'Plain Border', img: 'https://images.unsplash.com/photo-1524234107056-1c1f48f64ab8?w=100&h=100&fit=crop' }
+        { label: 'Cutwork', img: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=100&h=100&fit=crop' },
+        { label: 'Plain Border', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=100&h=100&fit=crop' }
     ],
     occasion: [
-        { label: 'Bridal', img: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=100&h=100&fit=crop' },
-        { label: 'Festive', img: 'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?w=100&h=100&fit=crop' },
-        { label: 'Cocktail', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=100&h=100&fit=crop' }
+        { label: 'Bridal', img: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&h=100&fit=crop' },
+        { label: 'Festive', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=100&h=100&fit=crop' },
+        { label: 'Cocktail', img: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=100&h=100&fit=crop' }
     ],
     work: [
-        { label: 'Maggam Work', img: 'https://images.unsplash.com/photo-1591360236480-4ed861025a18?w=100&h=100&fit=crop' },
-        { label: 'Zardozi', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=100&h=100&fit=crop' },
-        { label: 'Aari Work', img: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=100&h=100&fit=crop' },
-        { label: 'Stone Work', img: 'https://images.unsplash.com/photo-1531995811006-35cb42e1a022?w=100&h=100&fit=crop' }
+        { label: 'Maggam Work', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=100&h=100&fit=crop' },
+        { label: 'Zardozi', img: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&h=100&fit=crop' },
+        { label: 'Aari Work', img: 'https://images.unsplash.com/photo-1594144400267-0ef6d628795c?w=100&h=100&fit=crop' },
+        { label: 'Stone Work', img: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=100&h=100&fit=crop' }
     ]
 };
 

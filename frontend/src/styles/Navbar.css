@@ -15,9 +15,10 @@
 }
 
 .navbar.solid {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-sm);
     height: 70px;
 }
 
@@ -138,6 +139,56 @@
     outline: none;
     width: 100%;
     font-size: 0.85rem;
+    color: var(--color-secondary);
+}
+
+/* Search Suggestions */
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-xl);
+    padding: 24px;
+    z-index: 1002;
+    animation: fadeIn 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.suggestion-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 800;
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+    padding-left: 12px;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    color: var(--color-secondary);
+    font-weight: 500;
+}
+
+.suggestion-item:hover {
+    background: var(--pastel-blush);
+    color: var(--color-primary);
+    padding-left: 20px;
+}
+
+.suggestion-item span {
+    opacity: 0.5;
+    font-size: 0.8rem;
 }
 
 /* User Actions */

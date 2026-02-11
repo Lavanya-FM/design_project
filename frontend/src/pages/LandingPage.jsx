@@ -30,12 +30,12 @@ const LandingPage = () => {
     }, []);
 
     const FEATURED_DESIGNS = [
-        { id: 1, name: 'Royal Zardosi', img: 'https://images.unsplash.com/photo-1591137133358-3d7ca930491d?w=400' },
-        { id: 2, name: 'Temple Silk', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=400' },
-        { id: 3, name: 'Velvet Aari', img: 'https://images.unsplash.com/photo-1533038590840-1cde6e56f40f?w=400' },
-        { id: 4, name: 'Brocade Luxe', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=400' },
-        { id: 5, name: 'Modern Maggam', img: 'https://images.unsplash.com/photo-1445205170230-053b830c6050?w=400' },
-        { id: 6, name: 'Pearl Heritage', img: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=400' },
+        { id: 1, name: 'Royal Sun-Temple', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=600&q=80' },
+        { id: 2, name: 'Zari Petal Luxe', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=600&q=80' },
+        { id: 3, name: 'Velvet Midnight', img: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80' },
+        { id: 4, name: 'Brocade Jasmine', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=600&q=80' },
+        { id: 5, name: 'Gold Petal Aari', img: 'https://images.unsplash.com/photo-1591137133358-3d7ca930491d?w=600&q=80' },
+        { id: 6, name: 'Silk Ivory Lotus', img: 'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=600&q=80' },
     ];
 
     return (
