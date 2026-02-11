@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from '../layout/Navbar';
-import Footer from '../layout/Footer';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
 
 const OrderSuccess = () => {
