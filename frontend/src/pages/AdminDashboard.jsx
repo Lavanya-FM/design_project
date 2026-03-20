@@ -16,7 +16,7 @@ const TAILORS = [
 ];
 
 const ALTERATIONS = [
-    { id: 'alt_101', orderId: 'FF-2401', customer: 'Lavanya', type: 'Fit Issue', desc: 'Sleeves are 0.5 inch too tight.', status: 'pending', date: ' Feb 08', img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400' },
+    { id: 'alt_101', orderId: 'FF-2401', customer: 'Customer A', type: 'Fit Issue', desc: 'Sleeves are 0.5 inch too tight.', status: 'pending', date: ' Feb 08', img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400' },
 ];
 
 const AdminDashboard = () => {
@@ -138,7 +138,7 @@ const AdminDashboard = () => {
                                     </thead>
                                     <tbody>
                                         {[
-                                            { id: 'FF-2401', user: 'Lavanya P.', status: 'Stitching', date: 'Tomorrow' },
+                                            { id: 'FF-2401', user: 'Customer A.', status: 'Stitching', date: 'Tomorrow' },
                                             { id: 'FF-2405', user: 'Sneha R.', status: 'Fabric Sourced', date: 'Feb 12' },
                                             { id: 'FF-2398', user: 'Anjali M.', status: 'QC Pending', date: 'Today' },
                                         ].map(o => (

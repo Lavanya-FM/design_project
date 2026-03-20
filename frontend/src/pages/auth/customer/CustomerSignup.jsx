@@ -27,7 +27,7 @@ const CustomerSignup = () => {
                         <form onSubmit={handleSignup}>
                             <div className="form-group">
                                 <label className="form-label">Full Name</label>
-                                <input type="text" className="form-input" placeholder="e.g. Lavanya P." required />
+                                <input type="text" className="form-input" placeholder="Enter Full Name" required />
                             </div>
                             <div className="form-group" style={{ marginTop: '20px' }}>
                                 <label className="form-label">Email Address</label>
