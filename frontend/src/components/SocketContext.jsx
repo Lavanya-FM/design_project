@@ -11,8 +11,9 @@ export const SocketProvider = ({ children }) => {
     const user = userString ? JSON.parse(userString) : null;
 
     useEffect(() => {
-        // Connect to the orchestrator
-        const newSocket = io('http://localhost:5000');
+        // Connect to the orchestrator using env variable or fallback
+        const backendUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+        const newSocket = io(backendUrl);
         setSocket(newSocket);
 
         return () => newSocket.close();
