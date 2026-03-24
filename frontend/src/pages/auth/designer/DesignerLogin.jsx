@@ -24,7 +24,7 @@ const DesignerLogin = () => {
                     <div className="auth-form">
                         <h2>Workstation Login</h2>
                         <p className="tagline">Access your portfolio and manage your style exports</p>
-                        
+
                         <form onSubmit={handleLogin}>
                             <div className="form-group">
                                 <label className="form-label">Professional Email</label>
@@ -34,7 +34,7 @@ const DesignerLogin = () => {
                                 <label className="form-label">Key Password</label>
                                 <input type="password" className="form-input" placeholder="••••••••" required />
                             </div>
-                            
+
                             <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '30px', background: '#6c5ce7', borderColor: '#6c5ce7' }}>
                                 Enter Workspace
                             </button>

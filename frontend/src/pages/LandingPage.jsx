@@ -1,120 +1,187 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { ArrowRight, Scissors, Ruler, CheckCircle, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 import '../styles/LandingPage.css';
 
 const LandingPage = () => {
     const navigate = useNavigate();
-    const [scrolled, setScrolled] = useState(false);
-    const scrollRef = useRef(null);
 
-    useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 100);
-        window.addEventListener('scroll', handleScroll);
+    const fadeInUp = {
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+    };
 
-        // Auto-scroll carousel logic
-        const interval = setInterval(() => {
-            if (scrollRef.current) {
-                scrollRef.current.scrollLeft += 2;
-                if (scrollRef.current.scrollLeft >= scrollRef.current.scrollWidth - scrollRef.current.clientWidth) {
-                    scrollRef.current.scrollLeft = 0;
-                }
-            }
-        }, 30);
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            clearInterval(interval);
-        };
-    }, []);
+    const staggerContainer = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
+    };
 
     const FEATURED_DESIGNS = [
-        { id: 1, name: 'Royal Sun-Temple', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=600&q=80' },
-        { id: 2, name: 'Zari Petal Luxe', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=600&q=80' },
-        { id: 3, name: 'Velvet Midnight', img: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80' },
-        { id: 4, name: 'Brocade Jasmine', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=600&q=80' },
-        { id: 5, name: 'Gold Petal Aari', img: 'https://images.unsplash.com/photo-1591137133358-3d7ca930491d?w=600&q=80' },
-        { id: 6, name: 'Silk Ivory Lotus', img: 'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=600&q=80' },
+        { id: 1, name: 'Royal Sun-Temple', category: 'Bridal Collection', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=800&q=80' },
+        { id: 2, name: 'Zari Petal Luxe', category: 'Festive Wear', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=800&q=80' },
+        { id: 3, name: 'Silk Ivory Lotus', category: 'Contemporary', img: 'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=800&q=80' },
     ];
 
     return (
-        <div className="landing-wrapper">
+        <div className="landing-layout">
             <Navbar />
 
-            {/* Hero Section */}
-            <section className="hero-section">
-                <div className="hero-overlay"></div>
-                <div className="hero-content container animate-me">
-                    <span className="hero-badge">India's Premier Bridal Studio</span>
-                    <h1>Elegance Tailored <br />to <span>Perfection</span></h1>
-                    <p>Experience the luxury of hand-crafted bridal blouses, measured at home and designed by experts.</p>
-                    <div className="hero-actions">
-                        <button className="btn btn-primary btn-lg" onClick={() => navigate('/collections')}>Browse Collections</button>
-                        <button className="btn btn-outline-white btn-lg" onClick={() => navigate('/customizer')}>Design Your Own</button>
-                    </div>
-                </div>
-                <div className="hero-scroll-indicator">
-                    <span>Explore</span>
-                    <div className="mouse"></div>
-                </div>
-            </section>
+            {/* Elegant Hero Section */}
+            <section className="hero-modern">
+                <div className="hero-modern-container">
+                    <motion.div 
+                        className="hero-modern-text"
+                        initial="hidden"
+                        animate="visible"
+                        variants={staggerContainer}
+                    >
+                        <motion.div variants={fadeInUp} className="hero-modern-badge">
+                            <span className="badge-dot"></span> Custom Tailoring Reimagined
+                        </motion.div>
+                        <motion.h1 variants={fadeInUp}>
+                            Elegant Blouses, <br />
+                            <span className="text-italic-accent">Tailored for You.</span>
+                        </motion.h1>
+                        <motion.p variants={fadeInUp}>
+                            Experience the luxury of premium fabrics and master craftsmanship. 
+                            Design your perfect fit online, and let our experts handle the rest.
+                        </motion.p>
+                        <motion.div variants={fadeInUp} className="hero-modern-actions">
+                            <button className="btn-modern-primary" onClick={() => navigate('/customizer')}>
+                                Start Customizing <ArrowRight size={18} />
+                            </button>
+                            <button className="btn-modern-secondary" onClick={() => navigate('/collections')}>
+                                View Gallery
+                            </button>
+                        </motion.div>
+                        
+                        <motion.div variants={fadeInUp} className="hero-modern-stats">
+                            <div className="stat-block">
+                                <strong>15k+</strong>
+                                <span>Happy Clients</span>
+                            </div>
+                            <div className="stat-divider"></div>
+                            <div className="stat-block">
+                                <strong>100%</strong>
+                                <span>Perfect Fit Guarantee</span>
+                            </div>
+                        </motion.div>
+                    </motion.div>
 
-            {/* Featured Carousel */}
-            <section className="featured-carousel-section">
-                <div className="container">
-                    <h2 className="section-title">Trending Masterpieces</h2>
-                    <div className="carousel-container" ref={scrollRef}>
-                        {[...FEATURED_DESIGNS, ...FEATURED_DESIGNS].map((design, idx) => (
-                            <div key={`${design.id}-${idx}`} className="carousel-item shadow-lux" onClick={() => navigate('/collections')}>
-                                <img src={design.img} alt={design.name} />
-                                <div className="item-info">
-                                    <h4>{design.name}</h4>
-                                    <span>Bridal Series</span>
+                    <div className="hero-modern-visual">
+                        <motion.div 
+                            className="visual-main-image"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                        >
+                            <img src="https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=1000&q=80" alt="Elegant Bridal Blouse" />
+                            <div className="visual-float-card glass-effect">
+                                <ShieldCheck size={24} className="accent-icon" />
+                                <div>
+                                    <h4>Premium Quality</h4>
+                                    <p>Hand-crafted perfection</p>
                                 </div>
                             </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* How It Works Section */}
+            <section className="process-modern">
+                <div className="container">
+                    <motion.div 
+                        className="section-header-modern"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        variants={fadeInUp}
+                    >
+                        <h2>The Process</h2>
+                        <p>Three simple steps to your dream outfit.</p>
+                    </motion.div>
+
+                    <div className="process-grid">
+                        <motion.div 
+                            className="process-card"
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                        >
+                            <div className="process-icon-wrapper">
+                                <Scissors />
+                            </div>
+                            <h3>1. Design & Detail</h3>
+                            <p>Choose your fabric, neck style, sleeves, and intricate embroidery options from our customizer.</p>
+                        </motion.div>
+                        <motion.div 
+                            className="process-card"
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <div className="process-icon-wrapper">
+                                <Ruler />
+                            </div>
+                            <h3>2. Perfect Measurements</h3>
+                            <p>Provide your measurements online or schedule a free at-home consultation with our experts.</p>
+                        </motion.div>
+                        <motion.div 
+                            className="process-card"
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            <div className="process-icon-wrapper">
+                                <CheckCircle />
+                            </div>
+                            <h3>3. Master Crafting</h3>
+                            <p>Our artisans meticulously handcraft your blouse, delivering it directly to your doorstep.</p>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Featured Collection Highlight */}
+            <section className="featured-modern">
+                <div className="container">
+                    <div className="featured-header">
+                        <h2>Curated Masterpieces</h2>
+                        <button className="btn-link-action" onClick={() => navigate('/collections')}>
+                            Explore All <ArrowRight size={16} />
+                        </button>
+                    </div>
+                    
+                    <div className="featured-modern-grid">
+                        {FEATURED_DESIGNS.map((design, idx) => (
+                            <motion.div 
+                                key={design.id} 
+                                className="featured-modern-card"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.15 }}
+                                onClick={() => navigate('/collections')}
+                            >
+                                <div className="card-image-wrap">
+                                    <img src={design.img} alt={design.name} />
+                                    <div className="card-overlay">
+                                        <span>View Details</span>
+                                    </div>
+                                </div>
+                                <div className="card-modern-info">
+                                    <span className="card-category">{design.category}</span>
+                                    <h3>{design.name}</h3>
+                                </div>
+                            </motion.div>
                         ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Trust Stats */}
-            <section className="trust-strip">
-                <div className="container trust-container">
-                    <div className="stat-item">
-                        <span className="stat-num">15k+</span>
-                        <span className="stat-label">Happy Brides</span>
-                    </div>
-                    <div className="stat-item divider"></div>
-                    <div className="stat-item">
-                        <span className="stat-num">200+</span>
-                        <span className="stat-label">Master Tailors</span>
-                    </div>
-                    <div className="stat-item divider"></div>
-                    <div className="stat-item">
-                        <span className="stat-num">Perfect</span>
-                        <span className="stat-label">Fit Guarantee</span>
-                    </div>
-                </div>
-            </section>
-
-            {/* Perfect Fit Guarantee */}
-            <section className="guarantee-section container">
-                <div className="guarantee-card glass-panel">
-                    <div className="guarantee-info">
-                        <h2>The Perfect Fit <span>Promise</span></h2>
-                        <p>Not 100% happy with the fit? We provide complimentary alterations at your doorstep until it's perfect.</p>
-                        <ul className="promise-list">
-                            <li>✨ AI-Assisted Measurement Verification</li>
-                            <li>🪡 Expert Master Tailor Craftsmanship</li>
-                            <li>🔄 No-Questions-Asked Alterations</li>
-                        </ul>
-                    </div>
-                    <div className="guarantee-seal">
-                        <div className="seal-inner">
-                            <span>100%</span>
-                            <small>GUARANTEE</small>
-                        </div>
                     </div>
                 </div>
             </section>
