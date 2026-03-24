@@ -6,49 +6,16 @@ import Footer from '../components/Footer';
 import CONFIG from '../config';
 import '../styles/Collections.css';
 import { BLOUSE_DESIGNS } from '../data/designs';
-import { useSocket } from '../components/SocketContext';
 
 const FILTER_CATEGORIES = {
-    neck: [
-        { label: 'Deep U', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=100&h=100&fit=crop' },
-        { label: 'V Neck', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=100&h=100&fit=crop' },
-        { label: 'Sweetheart', img: 'https://images.unsplash.com/photo-1594144400267-0ef6d628795c?w=100&h=100&fit=crop' },
-        { label: 'Boat Neck', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=100&h=100&fit=crop' },
-        { label: 'Deep Round', img: 'https://images.unsplash.com/photo-1610030488171-80ca3602be71?w=100&h=100&fit=crop' },
-        { label: 'Pot Neck', img: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=100&h=100&fit=crop' },
-        { label: 'Keyhole', img: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=100&h=100&fit=crop' },
-        { label: 'High Neck', img: 'https://images.unsplash.com/photo-1551048632-24e237311d01?w=100&h=100&fit=crop' }
-    ],
-    sleeve: [
-        { label: 'Sleeveless', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=100&h=100&fit=crop' },
-        { label: 'Short Sleeves', img: 'https://images.unsplash.com/photo-1594144400267-0ef6d628795c?w=100&h=100&fit=crop' },
-        { label: 'Elbow Length', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=100&h=100&fit=crop' },
-        { label: 'Full Sleeves', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=100&h=100&fit=crop' }
-    ],
-    fabric: [
-        { label: 'Silk', img: 'https://images.unsplash.com/photo-1610030488171-80ca3602be71?w=100&h=100&fit=crop' },
-        { label: 'Velvet', img: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=100&h=100&fit=crop' },
-        { label: 'Cotton Silk', img: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=100&h=100&fit=crop' },
-        { label: 'Net/Lace', img: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=100&h=100&fit=crop' },
-        { label: 'Brocade', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=100&h=100&fit=crop' }
-    ],
-    border: [
-        { label: 'Zari Border', img: 'https://images.unsplash.com/photo-1551048632-24e237311d01?w=100&h=100&fit=crop' },
-        { label: 'Temple Border', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=100&h=100&fit=crop' },
-        { label: 'Cutwork', img: 'https://images.unsplash.com/photo-1544441893-675973e31985?w=100&h=100&fit=crop' },
-        { label: 'Plain Border', img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=100&h=100&fit=crop' }
-    ],
-    occasion: [
-        { label: 'Bridal', img: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&h=100&fit=crop' },
-        { label: 'Festive', img: 'https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=100&h=100&fit=crop' },
-        { label: 'Cocktail', img: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=100&h=100&fit=crop' }
-    ],
-    work: [
-        { label: 'Maggam Work', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=100&h=100&fit=crop' },
-        { label: 'Zardozi', img: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=100&h=100&fit=crop' },
-        { label: 'Aari Work', img: 'https://images.unsplash.com/photo-1594144400267-0ef6d628795c?w=100&h=100&fit=crop' },
-        { label: 'Stone Work', img: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=100&h=100&fit=crop' }
-    ]
+    Neckline: ['Deep U', 'V Neck', 'Sweetheart', 'Boat Neck', 'Deep Round', 'Pot Neck', 'Keyhole', 'High Neck'],
+    Sleeve: ['Sleeveless', 'Short Sleeves', 'Elbow Length', '3/4th Sleeves', 'Full Sleeves', 'Puff Sleeves'],
+    Fabric: ['Silk', 'Raw Silk', 'Velvet', 'Cotton Silk', 'Georgette', 'Net/Lace', 'Brocade', 'Tissue Silk'],
+    Border: ['Zari Border', 'Temple Border', 'Cutwork', 'Plain Border', 'No Border'],
+    Occasion: ['Bridal', 'Reception', 'Festive', 'Cocktail', 'Haldi'],
+    Work: ['Maggam Work', 'Zardozi', 'Aari Embroidery', 'Thread Embroidery', 'Stone Work', 'Mirror Work', 'Cutwork'],
+    Color: ['Red', 'Deep Red', 'Gold', 'Blue', 'Green', 'Pastel', 'Silver', 'Ivory', 'Pink'],
+    Back_Design: ['Tied Dori', 'Sheer Net', 'Deep U', 'Square', 'Keyhole', 'Deep V', 'Closed Back']
 };
 
 const SORT_OPTIONS = [
@@ -71,7 +38,7 @@ const DesignCard = ({ design, navigate, onFullscreen }) => {
 
     return (
         <div
-            className="design-card-premium hover-scale animate-me"
+            className="design-card-premium"
             onMouseEnter={() => setZoom(true)}
             onMouseLeave={() => setZoom(false)}
             onMouseMove={handleMouseMove}
@@ -81,7 +48,7 @@ const DesignCard = ({ design, navigate, onFullscreen }) => {
                     src={design.image_url || design.image}
                     alt={design.name}
                     loading="lazy"
-                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800'; }}
+                    onError={(e) => { e.target.src = '/classic_embroidery.png'; }}
                 />
 
                 {zoom && (
@@ -96,7 +63,6 @@ const DesignCard = ({ design, navigate, onFullscreen }) => {
                     />
                 )}
 
-                <div className="card-badge">{design.complexity}</div>
                 <div className="card-overlay" onClick={(e) => e.stopPropagation()}>
                     <button className="btn-customize-cta" onClick={() => navigate('/customizer', { state: { prefill: design } })}>
                         Select & Customize
@@ -106,24 +72,24 @@ const DesignCard = ({ design, navigate, onFullscreen }) => {
             </div>
             <div className="card-content">
                 <div className="card-meta">
-                    <span className="card-cat">{design.category}</span>
-                    <span className="card-time">🚚 {design.delivery_days} days</span>
+                    <span className="card-cat">{design.category || 'Bridal'}</span>
+                    <span className="card-time">🚚 {design.delivery_days || 15} days</span>
                 </div>
                 <h3 className="card-title">{design.name}</h3>
                 {design.work_type && (
-                    <div className="card-work-badge" style={{ fontSize: '0.7rem', color: '#D02F44', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '5px' }}>
+                    <div className="card-work-badge" style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px' }}>
                         ✨ {design.work_type}
                     </div>
                 )}
                 <div className="card-tags">
-                    <span className="tag-pill">{design.neck?.[0]}</span>
-                    <span className="tag-pill">{design.sleeve?.[0]}</span>
-                    {design.tags?.slice(0, 1).map(t => <span key={t} className="tag-pill">{t}</span>)}
+                    {design.neck?.[0] && <span className="tag-pill">{design.neck[0]}</span>}
+                    {design.sleeve?.[0] && <span className="tag-pill">{design.sleeve[0]}</span>}
+                    {design.color?.[0] && <span className="tag-pill">{design.color[0]}</span>}
                 </div>
                 <div className="card-footer">
                     <div className="card-price">
                         <span className="price-label">Starting at</span>
-                        <span className="price-val">₹{design.base_price || design.price}</span>
+                        <span className="price-val">₹{design.base_price || design.price || 12000}</span>
                     </div>
                 </div>
             </div>
@@ -132,25 +98,21 @@ const DesignCard = ({ design, navigate, onFullscreen }) => {
 };
 
 const Lightbox = ({ design, allDesigns, onSelect, onClose }) => {
-    // Find similar designs based on category or work_type
     const similarDesigns = allDesigns
         .filter(d => d.id !== design.id && (d.category === design.category || d.work_type === design.work_type))
         .slice(0, 4);
-
     const [isFav, setIsFav] = useState(false);
 
     return (
         <div className="lightbox-overlay" onClick={onClose}>
             <div className="lightbox-content animate-pop" onClick={e => e.stopPropagation()}>
                 <button className="lightbox-close" onClick={onClose}>×</button>
-                <button className={`lightbox-fav ${isFav ? 'active' : ''}`} onClick={() => setIsFav(!isFav)}>
-                    ♥
-                </button>
-                <img src={design.image_url || design.image} alt={design.name} className="lightbox-main-img" />
+                <button className={`lightbox-fav ${isFav ? 'active' : ''}`} onClick={() => setIsFav(!isFav)}>♥</button>
+                <img src={design.image_url || design.image} alt={design.name} className="lightbox-main-img" onError={(e) => { e.target.src = '/classic_embroidery.png'; }} />
 
                 <div className="lightbox-details">
                     <h3>{design.name}</h3>
-                    <p>{design.work_type} | {design.fabric}</p>
+                    <p>{design.work_type || 'Custom Work'} | {design.fabric || 'Silk'}</p>
                 </div>
 
                 {similarDesigns.length > 0 && (
@@ -159,15 +121,13 @@ const Lightbox = ({ design, allDesigns, onSelect, onClose }) => {
                         <div className="rec-grid">
                             {similarDesigns.map(s => (
                                 <div key={s.id} className="rec-item" onClick={() => onSelect(s)}>
-                                    <img src={s.image_url || s.image} alt={s.name} />
+                                    <img src={s.image_url || s.image} alt={s.name} onError={(e) => { e.target.src = '/classic_embroidery.png'; }} />
                                     <span>{s.name}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
-
-                <div className="lightbox-hint">Inspect every stitch. Close to return.</div>
             </div>
         </div>
     );
@@ -182,9 +142,17 @@ const Collections = () => {
     const [allDesigns, setAllDesigns] = useState(BLOUSE_DESIGNS);
     const [filteredDesigns, setFilteredDesigns] = useState(BLOUSE_DESIGNS);
     const [searchQuery, setSearchQuery] = useState(initialSearch);
-    const [activeFilters, setActiveFilters] = useState({
-        neck: [], sleeve: [], fabric: [], border: [], occasion: [], work: []
-    });
+    
+    // Check Authentication state
+    const userString = localStorage.getItem('user');
+    const isAuthenticated = !!userString;
+
+    // E-commerce standard filters state
+    const [activeFilters, setActiveFilters] = useState(
+        Object.keys(FILTER_CATEGORIES).reduce((acc, cat) => ({ ...acc, [cat]: [] }), {})
+    );
+    const [collapsedFilters, setCollapsedFilters] = useState({});
+
     const [sortBy, setSortBy] = useState('popular');
     const [fullscreenDesign, setFullscreenDesign] = useState(null);
 
@@ -193,13 +161,23 @@ const Collections = () => {
             try {
                 const response = await axios.get(`${CONFIG.API_URL}/designs`);
                 if (response.data && response.data.length > 0) {
-                    const apiData = response.data.map(d => ({
-                        ...d,
-                        tags: Array.isArray(d.tags) ? d.tags : (d.tags ? JSON.parse(d.tags) : []),
-                        neck: Array.isArray(d.neck) ? d.neck : (d.neck ? JSON.parse(d.neck) : []),
-                        sleeve: Array.isArray(d.sleeve) ? d.sleeve : (d.sleeve ? JSON.parse(d.sleeve) : []),
-                        fabric: Array.isArray(d.fabric) ? d.fabric : (d.fabric ? JSON.parse(d.fabric) : []),
-                    }));
+                    const apiData = response.data.map(d => {
+                        // SANITIZE: Prevent any external/human-related images from breaking the UX
+                        let safeImage = d.image_url || d.image;
+                        if (safeImage && (safeImage.includes('unsplash') || safeImage.includes('photo') || safeImage.includes('user'))) {
+                            safeImage = '/classic_embroidery.png'; // Enforce safe non-human asset
+                        }
+                        return {
+                            ...d,
+                            image_url: safeImage,
+                            tags: Array.isArray(d.tags) ? d.tags : (d.tags ? JSON.parse(d.tags) : []),
+                            neck: Array.isArray(d.neck) ? d.neck : (d.neck ? JSON.parse(d.neck) : []),
+                            sleeve: Array.isArray(d.sleeve) ? d.sleeve : (d.sleeve ? JSON.parse(d.sleeve) : []),
+                            fabric: Array.isArray(d.fabric) ? d.fabric : (d.fabric ? JSON.parse(d.fabric) : []),
+                            color: Array.isArray(d.color) ? d.color : (d.color ? JSON.parse(d.color) : []),
+                            back_design: Array.isArray(d.back_design) ? d.back_design : (d.back_design ? JSON.parse(d.back_design) : []),
+                        };
+                    });
                     const merged = [...BLOUSE_DESIGNS, ...apiData.filter(ad => !BLOUSE_DESIGNS.find(md => md.id === ad.id))];
                     setAllDesigns(merged);
                 }
@@ -216,39 +194,51 @@ const Collections = () => {
             const lowQuery = searchQuery.toLowerCase();
             results = results.filter(d =>
                 d.name?.toLowerCase().includes(lowQuery) ||
-                d.tags?.some(t => t.toLowerCase().includes(lowQuery))
+                d.tags?.some(t => t.toLowerCase().includes(lowQuery)) ||
+                d.category?.toLowerCase().includes(lowQuery) ||
+                d.work_type?.toLowerCase().includes(lowQuery)
             );
         }
+        
         Object.keys(activeFilters).forEach(key => {
             const selectedVals = activeFilters[key];
             if (selectedVals.length > 0) {
-                if (key === 'occasion') {
+                if (key === 'Occasion') {
                     results = results.filter(d => selectedVals.includes(d.category));
+                } else if (key === 'Work') {
+                    results = results.filter(d => selectedVals.includes(d.work_type));
                 } else {
-                    results = results.filter(d =>
-                        selectedVals.some(v => (d[key] || []).includes(v))
-                    );
+                    const mapping = {
+                        Neckline: 'neck', Sleeve: 'sleeve', Fabric: 'fabric', Color: 'color', Back_Design: 'back_design'
+                    };
+                    const propKey = mapping[key] || key.toLowerCase();
+                    results = results.filter(d => selectedVals.some(v => (d[propKey] || []).includes(v)));
                 }
             }
         });
-        if (sortBy === 'price_asc') results.sort((a, b) => (a.base_price || a.price) - (b.base_price || b.price));
-        if (sortBy === 'price_desc') results.sort((a, b) => (b.base_price || b.price) - (a.base_price || a.price));
+
+        if (sortBy === 'price_asc') results.sort((a, b) => (a.base_price || a.price || 0) - (b.base_price || b.price || 0));
+        if (sortBy === 'price_desc') results.sort((a, b) => (b.base_price || b.price || 0) - (a.base_price || a.price || 0));
         if (sortBy === 'popular') results.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+        if (sortBy === 'newest') results.reverse();
+        
         setFilteredDesigns(results);
     }, [searchQuery, activeFilters, sortBy, allDesigns]);
 
     const toggleFilter = (category, value) => {
         setActiveFilters(prev => {
-            const current = prev[category];
-            const next = current.includes(value)
-                ? current.filter(v => v !== value)
-                : [...current, value];
+            const current = prev[category] || [];
+            const next = current.includes(value) ? current.filter(v => v !== value) : [...current, value];
             return { ...prev, [category]: next };
         });
     };
 
+    const toggleCollapse = (cat) => {
+        setCollapsedFilters(prev => ({ ...prev, [cat]: !prev[cat] }));
+    };
+
     const clearFilters = () => {
-        setActiveFilters({ neck: [], sleeve: [], fabric: [], border: [], occasion: [], work: [] });
+        setActiveFilters(Object.keys(FILTER_CATEGORIES).reduce((acc, cat) => ({ ...acc, [cat]: [] }), {}));
         setSearchQuery('');
         navigate('/collections');
     };
@@ -257,33 +247,47 @@ const Collections = () => {
         <>
             <Navbar />
             {fullscreenDesign && (
-                <Lightbox
-                    design={fullscreenDesign}
-                    allDesigns={allDesigns}
-                    onSelect={setFullscreenDesign}
-                    onClose={() => setFullscreenDesign(null)}
-                />
+                <Lightbox design={fullscreenDesign} allDesigns={allDesigns} onSelect={setFullscreenDesign} onClose={() => setFullscreenDesign(null)} />
             )}
             <div className="page-container collection-page">
                 <div className="container collections-layout">
+                    
+                    {/* E-COMMERCE SIDEBAR */}
                     <aside className="filters-sidebar">
                         <div className="sidebar-header">
                             <h3>Filter By</h3>
                             <button className="btn-text" onClick={clearFilters}>Clear All</button>
                         </div>
-                        {Object.entries(FILTER_CATEGORIES).map(([cat, options]) => (
-                            <div key={cat} className="filter-group">
-                                <h4 className="filter-cat-title">{cat}</h4>
-                                <div className="filter-visual-grid">
-                                    {options.map(opt => (
-                                        <div key={opt.label} className={`visual-pill ${activeFilters[cat].includes(opt.label) ? 'active' : ''}`} onClick={() => toggleFilter(cat, opt.label)}>
-                                            <div className="pill-img-wrap"><img src={opt.img} alt={opt.label} /></div>
-                                            <span>{opt.label}</span>
+
+                        {Object.entries(FILTER_CATEGORIES).map(([cat, options]) => {
+                            const isCollapsed = collapsedFilters[cat];
+                            const activeCount = activeFilters[cat]?.length || 0;
+                            
+                            return (
+                                <div key={cat} className="filter-group-ecommerce">
+                                    <div className="filter-cat-header" onClick={() => toggleCollapse(cat)}>
+                                        <h4>{cat.replace('_', ' ')} {activeCount > 0 && <span className="filter-badge">{activeCount}</span>}</h4>
+                                        <span className="collapse-icon">{isCollapsed ? '+' : '-'}</span>
+                                    </div>
+                                    
+                                    {!isCollapsed && (
+                                        <div className="filter-checkbox-list">
+                                            {options.map(opt => (
+                                                <label key={opt} className="filter-checkbox-item">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={activeFilters[cat]?.includes(opt) || false} 
+                                                        onChange={() => toggleFilter(cat, opt)} 
+                                                    />
+                                                    <span className="checkbox-custom"></span>
+                                                    <span className="filter-label">{opt}</span>
+                                                </label>
+                                            ))}
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </aside>
 
                     <main className="results-area">
@@ -299,23 +303,53 @@ const Collections = () => {
                             </div>
                         </div>
 
-                        <div className="designs-grid">
-                            {filteredDesigns.map(design => (
-                                <DesignCard
-                                    key={design.id}
-                                    design={design}
-                                    navigate={navigate}
-                                    onFullscreen={setFullscreenDesign}
-                                />
-                            ))}
-                        </div>
+                        {/* Determine Display Designs */}
+                        {(() => {
+                            const designsToShow = isAuthenticated ? filteredDesigns : filteredDesigns.slice(0, 4);
+                            
+                            return (
+                                <>
+                                    {designsToShow.length > 0 ? (
+                                        <div className="designs-grid">
+                                            {designsToShow.map(design => (
+                                                <DesignCard key={design.id} design={design} navigate={navigate} onFullscreen={setFullscreenDesign} />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="empty-state">
+                                            <h2>No designs match your precise selection.</h2>
+                                            <p style={{color: '#64748b', margin: '10px 0'}}>Try removing some filters to see more results.</p>
+                                            <button className="btn-customize-cta" onClick={clearFilters} style={{marginTop: '20px'}}>Clear All Filters</button>
+                                        </div>
+                                    )}
 
-                        {filteredDesigns.length === 0 && (
-                            <div className="empty-state">
-                                <h2>No designs match your selection</h2>
-                                <button className="btn btn-primary" onClick={clearFilters}>Clear All Filters</button>
-                            </div>
-                        )}
+                                    {/* Call To Action for Unauthenticated Users */}
+                                    {!isAuthenticated && filteredDesigns.length > 4 && (
+                                        <div className="collection-auth-cta" style={{
+                                            marginTop: '60px', 
+                                            padding: '50px 30px', 
+                                            background: '#ffffff', 
+                                            border: '1px solid #e2e8f0', 
+                                            borderRadius: '2px', 
+                                            textAlign: 'center', 
+                                            boxShadow: '0 10px 30px rgba(10, 25, 47, 0.05)'
+                                        }}>
+                                            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '2.2rem', color: '#0A192F', marginBottom: '16px' }}>Unlock the Full Atelier Collection</h2>
+                                            <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '600px', margin: '0 auto 30px auto', lineHeight: '1.6' }}>
+                                                You are currently viewing a limited preview. Sign up or log in to explore hundreds of exclusive bespoke designs, unlock 360° customization, and book structural tailoring consultations.
+                                            </p>
+                                            <button 
+                                                className="btn-customize-cta" 
+                                                onClick={() => navigate('/auth/role-selection')}
+                                                style={{ padding: '16px 40px', fontSize: '0.9rem' }}
+                                            >
+                                                LOGIN / SIGNUP TO VIEW MORE
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </main>
                 </div>
             </div>

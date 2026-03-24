@@ -16,7 +16,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f7ede2;
+    background: #f8fafc; /* Cool grey background instead of tan */
 }
 
 .preview-card {
@@ -24,12 +24,13 @@
     max-width: 600px;
     aspect-ratio: 1;
     background: white;
-    border-radius: 40px;
+    border-radius: 2px; /* Strict border instead of 40px */
     box-shadow: var(--shadow-lux);
     position: relative;
     display: flex;
     flex-direction: column;
     padding: 40px;
+    border: 1px solid var(--color-border);
 }
 
 .preview-label {
@@ -40,16 +41,84 @@
     color: var(--color-text-muted);
 }
 
-.svg-wrapper {
+.interactive-3d-viewer {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border: 1px dashed var(--color-border);
+    background: #f1f5f9;
+    margin: 20px 0;
+    border-radius: 2px;
 }
 
-.blouse-svg {
-    width: 300px;
-    transition: fill 0.5s ease;
+.viewer-hint {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 25, 47, 0.7);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.customizer-target-img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.fade-in-angle {
+    animation: fadeInAngle 0.2s ease-out;
+}
+
+@keyframes fadeInAngle {
+    0% { opacity: 0.8; transform: scale(0.98); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+.zoom-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.zoom-slider {
+    flex: 1;
+    appearance: none;
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    outline: none;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--color-accent);
 }
 
 .preview-meta {
@@ -63,12 +132,13 @@
 .controls-container {
     padding: 40px;
     overflow-y: auto;
+    background: #ffffff;
 }
 
 .controls-card {
     background: white;
     padding: 50px;
-    border-radius: 30px;
+    border-radius: 2px; /* Strict border */
     min-height: 100%;
     display: flex;
     flex-direction: column;
@@ -76,13 +146,14 @@
 
 .controls-header h1 {
     font-family: var(--font-heading);
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     margin-bottom: 8px;
+    color: var(--color-primary);
 }
 
 .controls-header p {
     font-size: 0.9rem;
-    color: #666;
+    color: var(--color-text-muted);
     margin-bottom: 40px;
 }
 
@@ -91,7 +162,7 @@
     display: flex;
     gap: 12px;
     margin-bottom: 40px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 2px solid var(--color-border);
     padding-bottom: 15px;
 }
 
@@ -104,7 +175,9 @@
     color: var(--color-text-muted);
     cursor: pointer;
     transition: all 0.3s;
-    border-radius: var(--radius-pill);
+    border-radius: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .tab-btn.active {
@@ -124,7 +197,7 @@
     text-transform: uppercase;
     font-size: 0.72rem;
     letter-spacing: 1px;
-    color: var(--color-text-muted);
+    color: var(--color-text-light);
 }
 
 .option-grid {
@@ -135,24 +208,26 @@
 
 .option-pill {
     padding: 12px 20px;
-    background: #f9f9f9;
-    border-radius: 12px;
+    background: var(--color-background);
+    border-radius: 2px;
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    border: 1px solid transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
 }
 
 .option-pill:hover {
-    background: #eee;
+    background: var(--color-surface);
+    border-color: var(--color-primary-light);
 }
 
 .option-pill.selected {
-    border-color: var(--color-primary);
-    background: #fff;
-    color: var(--color-primary);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-color: var(--color-accent); /* Gold border wrapper */
+    background: var(--color-primary);
+    color: white;
+    box-shadow: none;
 }
 
 /* Footer */
@@ -162,6 +237,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    border-top: 1px solid var(--color-border);
 }
 
 .price-estimation {
@@ -172,14 +248,17 @@
 
 .price-estimation .label {
     font-weight: 700;
-    color: #666;
-    font-size: 0.9rem;
+    color: var(--color-text-light);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .price-estimation .price {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 900;
     color: var(--color-secondary);
+    font-family: var(--font-body);
 }
 
 @media (max-width: 1000px) {

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { ArrowRight, Scissors, Ruler, CheckCircle, ShieldCheck } from 'lucide-react';
+import { Briefcase, Target, ShieldCheck, ChevronRight, Diamond } from 'lucide-react';
 import { motion } from 'framer-motion';
 import '../styles/LandingPage.css';
 
@@ -19,170 +19,196 @@ const LandingPage = () => {
         visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
     };
 
-    const FEATURED_DESIGNS = [
-        { id: 1, name: 'Royal Sun-Temple', category: 'Bridal Collection', img: 'https://images.unsplash.com/photo-1590736704044-672584a39005?w=800&q=80' },
-        { id: 2, name: 'Zari Petal Luxe', category: 'Festive Wear', img: 'https://images.unsplash.com/photo-1582533561751-6fb758d4a991?w=800&q=80' },
-        { id: 3, name: 'Silk Ivory Lotus', category: 'Contemporary', img: 'https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=800&q=80' },
-    ];
-
     return (
-        <div className="landing-layout">
+        <div className="corporate-landing">
             <Navbar />
 
-            {/* Elegant Hero Section */}
-            <section className="hero-modern">
-                <div className="hero-modern-container">
+            {/* Atelier Hero Section */}
+            <section className="corp-hero-section">
+                <div className="container-corporate">
+                    
+                    {/* Left Text Content */}
                     <motion.div 
-                        className="hero-modern-text"
+                        className="corp-hero-text"
                         initial="hidden"
                         animate="visible"
                         variants={staggerContainer}
                     >
-                        <motion.div variants={fadeInUp} className="hero-modern-badge">
-                            <span className="badge-dot"></span> Custom Tailoring Reimagined
+                        <motion.div variants={fadeInUp} className="corp-badge">
+                            <span className="corp-badge-indicator">✦</span>
+                            BRIDAL COUTURE
                         </motion.div>
                         <motion.h1 variants={fadeInUp}>
-                            Elegant Blouses, <br />
-                            <span className="text-italic-accent">Tailored for You.</span>
+                            Mastering the Art of <br />
+                            <span className="hero-italic-gold">Bridal Blouses.</span>
                         </motion.h1>
                         <motion.p variants={fadeInUp}>
-                            Experience the luxury of premium fabrics and master craftsmanship. 
-                            Design your perfect fit online, and let our experts handle the rest.
+                            Elevate your special day with our signature bespoke blouses. We specialize in intricate maggam work, aari embroidery, and elegant silhouettes designed explicitly for the modern bride.
                         </motion.p>
-                        <motion.div variants={fadeInUp} className="hero-modern-actions">
-                            <button className="btn-modern-primary" onClick={() => navigate('/customizer')}>
-                                Start Customizing <ArrowRight size={18} />
+                        <motion.div variants={fadeInUp} className="corp-button-group">
+                            <button className="btn-corp-primary" onClick={() => navigate('/customizer')}>
+                                Design Your Blouse
                             </button>
-                            <button className="btn-modern-secondary" onClick={() => navigate('/collections')}>
-                                View Gallery
+                            <button className="btn-corp-secondary" onClick={() => navigate('/collections')}>
+                                View Bridal Gallery
                             </button>
                         </motion.div>
                         
-                        <motion.div variants={fadeInUp} className="hero-modern-stats">
-                            <div className="stat-block">
-                                <strong>15k+</strong>
-                                <span>Happy Clients</span>
+                        <motion.div variants={fadeInUp} className="corp-trust-metrics">
+                            <div className="metric">
+                                <strong>10Y+</strong>
+                                <span>Bridal Heritage</span>
                             </div>
-                            <div className="stat-divider"></div>
-                            <div className="stat-block">
-                                <strong>100%</strong>
-                                <span>Perfect Fit Guarantee</span>
+                            <div className="metric-divider"></div>
+                            <div className="metric">
+                                <strong>5k+</strong>
+                                <span>Blouses Crafted</span>
                             </div>
                         </motion.div>
                     </motion.div>
 
-                    <div className="hero-modern-visual">
+                    {/* Right Image Content */}
+                    <div className="corp-hero-visual">
                         <motion.div 
-                            className="visual-main-image"
-                            initial={{ opacity: 0, scale: 0.95 }}
+                            className="corp-image-container"
+                            initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 1, ease: "easeOut" }}
                         >
-                            <img src="https://images.unsplash.com/photo-1615392601002-3ef72f9a706f?w=1000&q=80" alt="Elegant Bridal Blouse" />
-                            <div className="visual-float-card glass-effect">
-                                <ShieldCheck size={24} className="accent-icon" />
-                                <div>
-                                    <h4>Premium Quality</h4>
-                                    <p>Hand-crafted perfection</p>
-                                </div>
-                            </div>
+                            <img src="/bridal_hero.png" alt="High-end embroidered bridal blouse flat-lay" loading="lazy" />
+                            
+                            <motion.div 
+                                className="corp-overlay-card"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.8, duration: 0.5 }}
+                            >
+                                <span className="corp-overlay-title">Premium Silk & Zardosi</span>
+                                <span className="corp-overlay-subtitle">Handcrafted with immaculate, intricate precision.</span>
+                            </motion.div>
                         </motion.div>
                     </div>
+
                 </div>
             </section>
 
-            {/* How It Works Section */}
-            <section className="process-modern">
-                <div className="container">
-                    <motion.div 
-                        className="section-header-modern"
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, margin: "-100px" }}
-                        variants={fadeInUp}
-                    >
-                        <h2>The Process</h2>
-                        <p>Three simple steps to your dream outfit.</p>
-                    </motion.div>
-
-                    <div className="process-grid">
-                        <motion.div 
-                            className="process-card"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 }}
-                        >
-                            <div className="process-icon-wrapper">
-                                <Scissors />
-                            </div>
-                            <h3>1. Design & Detail</h3>
-                            <p>Choose your fabric, neck style, sleeves, and intricate embroidery options from our customizer.</p>
-                        </motion.div>
-                        <motion.div 
-                            className="process-card"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            <div className="process-icon-wrapper">
-                                <Ruler />
-                            </div>
-                            <h3>2. Perfect Measurements</h3>
-                            <p>Provide your measurements online or schedule a free at-home consultation with our experts.</p>
-                        </motion.div>
-                        <motion.div 
-                            className="process-card"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3 }}
-                        >
-                            <div className="process-icon-wrapper">
-                                <CheckCircle />
-                            </div>
-                            <h3>3. Master Crafting</h3>
-                            <p>Our artisans meticulously handcraft your blouse, delivering it directly to your doorstep.</p>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Featured Collection Highlight */}
-            <section className="featured-modern">
-                <div className="container">
-                    <div className="featured-header">
-                        <h2>Curated Masterpieces</h2>
-                        <button className="btn-link-action" onClick={() => navigate('/collections')}>
-                            Explore All <ArrowRight size={16} />
+            {/* Collections Portfolio */}
+            <section className="corp-portfolio-section">
+                <div className="container-corporate">
+                    <div className="corp-section-header">
+                        <div className="header-text-group">
+                            <span className="corp-subheading">BLOUSE ORIGINALS</span>
+                            <h2>Exclusive Bridal Blouses</h2>
+                        </div>
+                        <button className="btn-corp-link" onClick={() => navigate('/collections')}>
+                            Explore All <ChevronRight size={16} />
                         </button>
                     </div>
-                    
-                    <div className="featured-modern-grid">
-                        {FEATURED_DESIGNS.map((design, idx) => (
-                            <motion.div 
-                                key={design.id} 
-                                className="featured-modern-card"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.15 }}
-                                onClick={() => navigate('/collections')}
-                            >
-                                <div className="card-image-wrap">
-                                    <img src={design.img} alt={design.name} />
-                                    <div className="card-overlay">
-                                        <span>View Details</span>
-                                    </div>
-                                </div>
-                                <div className="card-modern-info">
-                                    <span className="card-category">{design.category}</span>
-                                    <h3>{design.name}</h3>
-                                </div>
-                            </motion.div>
-                        ))}
+
+                    <div className="corp-portfolio-grid">
+                        <motion.div 
+                            className="corp-portfolio-card"
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6 }}
+                            onClick={() => navigate('/collections')}
+                        >
+                            <div className="corp-card-image">
+                                <img src="/classic_embroidery.png" alt="Traditional Maggam Work Blouse" loading="lazy" />
+                            </div>
+                            <div className="corp-card-body">
+                                <h3>Traditional Maggam Excellence</h3>
+                                <p>Heavy, timeless embroidery engineering a commanding bridal presence and eternal sophistication.</p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div 
+                            className="corp-portfolio-card"
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            onClick={() => navigate('/collections')}
+                        >
+                            <div className="corp-card-image">
+                                <img src="/modern_blouse.png" alt="Modern Pastel Designer Blouse" loading="lazy" />
+                            </div>
+                            <div className="corp-card-body">
+                                <h3>Modern Pastel Silhouettes</h3>
+                                <p>Sleek and romantic aesthetic combining contemporary necklines with delicate pastel tones.</p>
+                            </div>
+                        </motion.div>
                     </div>
+                </div>
+            </section>
+
+            {/* Methodology Section */}
+            <section className="corp-methodology-section">
+                <div className="container-corporate">
+                    <motion.div 
+                        className="corp-center-header"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeInUp}
+                    >
+                        <span className="corp-subheading">ATELIER METHODOLOGY</span>
+                        <h2>The Bridal Fitting Process</h2>
+                        <div className="diamond-divider">
+                            <Diamond size={16} /> <Diamond size={16} /> <Diamond size={16} />
+                        </div>
+                    </motion.div>
+
+                    <div className="corp-process-grid">
+                        <motion.div className="corp-process-step" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} transition={{ delay: 0.1 }}>
+                            <div className="corp-step-icon">
+                                <Target size={28} />
+                            </div>
+                            <h4>1. Strategic Consultation</h4>
+                            <p>We analyze your stylistic environment, personal brand, and exact measurements to formulate a sartorial strategy.</p>
+                        </motion.div>
+                        
+                        <motion.div className="corp-process-step" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} transition={{ delay: 0.2 }}>
+                            <div className="corp-step-icon">
+                                <ShieldCheck size={28} />
+                            </div>
+                            <h4>2. Precision Design</h4>
+                            <p>Selection of luxurious silks, followed by meticulous custom blouse pattern generation and artisan aari hand-embroidery.</p>
+                        </motion.div>
+
+                        <motion.div className="corp-process-step" variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} transition={{ delay: 0.3 }}>
+                            <div className="corp-step-icon">
+                                <Briefcase size={28} />
+                            </div>
+                            <h4>3. White-Glove Delivery</h4>
+                            <p>Immaculate hand-finishing and quality assurance. Your bridal blouse is delivered securely before your special day.</p>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Atelier CTA Banner */}
+            <section className="corp-cta-section">
+                <div className="container-corporate">
+                    <motion.div 
+                        className="corp-cta-box"
+                        initial={{ opacity: 0, y: 40 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <div className="corp-cta-text">
+                            <h2>Define Your Sartorial Legacy.</h2>
+                            <p>Join our exclusive tailoring network for priority consultations and private access to exceptional, limited-run fabrics.</p>
+                        </div>
+                        <div className="corp-cta-action">
+                            <div className="corp-input-group">
+                                <input type="email" placeholder="Enter preferred email address" />
+                                <button className="btn-corp-solid">Apply for Access</button>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             </section>
 

@@ -42,7 +42,7 @@ const Footer = () => {
             </div>
 
             <div className="footer-bottom">
-                <p>&copy; 2024 Fit & Flare Studio. All Rights Reserved. | <Link to="/privacy">Privacy Policy</Link></p>
+                <p>&copy; 2026 Fit & Flare Studio. All Rights Reserved. | <Link to="/privacy">Privacy Policy</Link></p>
             </div>
         </footer>
     );

@@ -1,28 +1,28 @@
 :root {
-  /* Brand Colors — Fit & Flare Studio */
-  --color-primary: #D02F44;
-  --color-primary-dark: #A81B2E;
-  --color-primary-light: #FF6B81;
-  --color-secondary: #1C1C1C;
-  --color-accent: #F4EBE8;
-  --color-text: #333333;
-  --color-text-light: #666666;
-  --color-text-muted: #999999;
+  /* Brand Colors — Atelier Executive Style */
+  --color-primary: #0A192F; /* Midnight Navy */
+  --color-primary-dark: #061020;
+  --color-primary-light: #1A365D;
+  --color-secondary: #0A192F; /* Deep Navy */
+  --color-accent: #C5A059; /* Gold */
+  --color-text: #1e293b;
+  --color-text-light: #475569;
+  --color-text-muted: #64748b;
   --color-background: #FFFFFF;
-  --color-surface: #FAFAFA;
-  --color-border: #E5E5E5;
+  --color-surface: #f8fafc;
+  --color-border: #e2e8f0;
 
-  /* Pastel Palette — Indian Fashion Aesthetic */
-  --pastel-ivory: #FDF8F0;
-  --pastel-blush: #FFF0F3;
-  --pastel-pink: #FFE4EC;
-  --pastel-sage: #E8F0E8;
-  --pastel-lavender: #F0EBF7;
-  --pastel-cream: #FFF8E7;
-  --pastel-mint: #E0F2ED;
-  --pastel-rose: #FDE2E4;
-  --pastel-gold: #F7E7CE;
-  --pastel-champagne: #F5F0E8;
+  /* Pastel Palette — Adjusted to cool grays and crisp whites for executive corporate style */
+  --pastel-ivory: #f8fafc;
+  --pastel-blush: #f1f5f9;
+  --pastel-pink: #e2e8f0;
+  --pastel-sage: #e8f0e8;
+  --pastel-lavender: #f0ebf7;
+  --pastel-cream: #ffffff;
+  --pastel-mint: #e0f2ed;
+  --pastel-rose: #f8fafc;
+  --pastel-gold: #f7e7ce;
+  --pastel-champagne: #f5f0e8;
 
   /* Status Colors */
   --color-success: #27AE60;
@@ -35,8 +35,8 @@
   --color-info-light: #EBF5FB;
 
   /* Typography */
-  --font-heading: 'Playfair Display', 'Georgia', serif;
-  --font-body: 'Lato', 'Segoe UI', sans-serif;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -47,28 +47,29 @@
   --spacing-xxl: 64px;
   --spacing-giant: 96px;
 
-  /* Shadows */
+  /* Shadows - Sharpened for architectural aesthetic */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
-  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 30px rgba(208, 47, 68, 0.12);
-  --shadow-card: 0 2px 20px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 15px rgba(197, 160, 89, 0.2);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-lux: 0 10px 30px rgba(10, 25, 47, 0.08);
 
-  /* Radius */
-  --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --radius-pill: 50px;
+  /* Radius - made strict and architectural to match Landing Page */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-pill: 2px; /* Force legacy pills to look like structural buttons */
 
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
-  --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(226, 232, 240, 0.8);
   --glass-blur: blur(12px);
 }
