@@ -63,10 +63,16 @@ const AdminDashboard = () => {
                 setOrders(ordersRes.data);
                 
                 // Sanitize incoming admin designs
-                const safeDesigns = designsRes.data.map(d => ({
-                    ...d,
-                    image: (d.image || d.image_url || '').includes('unsplash') ? '/bridal_hero.png' : (d.image || d.image_url || '/classic_embroidery.png')
-                }));
+                const backendBase = CONFIG.API_URL.replace('/api', '');
+                const safeDesigns = designsRes.data.map(d => {
+                    let safeImage = d.image || d.image_url || '';
+                    if (safeImage.startsWith('/static/uploads/')) {
+                        safeImage = `${backendBase}${safeImage}`;
+                    } else if (safeImage.includes('unsplash')) {
+                        safeImage = '/bridal_hero.png';
+                    }
+                    return { ...d, image: safeImage || '/classic_embroidery.png' };
+                });
                 setDesigns(safeDesigns);
             } catch (err) {
                 console.error("Admin fetch error:", err);
@@ -149,9 +155,35 @@ const AdminDashboard = () => {
             
             const res = await axios.post(`${CONFIG.API_URL}/designs`, payload);
             if(res.data) {
-                setDesigns([{...res.data, image: res.data.image_url || res.data.image || mainImg}, ...designs]);
+                const backendBase = CONFIG.API_URL.replace('/api', '');
+                let finalImg = res.data.image || mainImg;
+                if (finalImg.startsWith('/static/uploads/')) finalImg = `${backendBase}${finalImg}`;
+                
+                const publishedDesign = {
+                    ...res.data,
+                    image: finalImg,
+                    name: newDesign.name,
+                    category: newDesign.category,
+                    price: Number(newDesign.price)
+                };
+                setDesigns([publishedDesign, ...designs]);
                 showToast('Brand New Design Published to Collections!', 'success');
                 setDesignModal(false);
+                setNewDesign({
+                    name: '',
+                    category: 'Bridal',
+                    price: 4500,
+                    image_url: '/modern_blouse.png',
+                    neck: 'Deep U',
+                    sleeve: 'Short Sleeves',
+                    back_design: 'Tied Dori',
+                    fabric: 'Silk',
+                    color: '#0A192F',
+                    border: 'Zari Border',
+                    work_type: 'Plain',
+                    tassels: 'None'
+                });
+                setUploadedImages([{ preview: '', tag: 'Front View' }]);
             }
         } catch(err) {
             showToast('Failed to deploy design to production.', 'error');

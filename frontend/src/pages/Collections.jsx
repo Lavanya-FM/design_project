@@ -162,14 +162,30 @@ const Collections = () => {
                 const response = await axios.get(`${CONFIG.API_URL}/designs`);
                 if (response.data && response.data.length > 0) {
                     const apiData = response.data.map(d => {
-                        // SANITIZE: Prevent any external/human-related images from breaking the UX
+                        // SANITIZE & RESOLVE: Prepend Backend URL for local uploads & prevent human images
+                        const backendBase = CONFIG.API_URL.replace('/api', '');
                         let safeImage = d.image_url || d.image;
-                        if (safeImage && (safeImage.includes('unsplash') || safeImage.includes('photo') || safeImage.includes('user'))) {
+                        
+                        if (safeImage && safeImage.startsWith('/static/uploads/')) {
+                            safeImage = `${backendBase}${safeImage}`;
+                        } else if (safeImage && (safeImage.includes('unsplash') || safeImage.includes('photo') || safeImage.includes('user'))) {
                             safeImage = '/classic_embroidery.png'; // Enforce safe non-human asset
                         }
+
+                        // Resolve angles if they exist
+                        let safeAngles = d.angles || [];
+                        if (typeof safeAngles === 'string') {
+                            try { safeAngles = JSON.parse(safeAngles); } catch(e) { safeAngles = []; }
+                        }
+                        safeAngles = safeAngles.map(ang => ({
+                            ...ang,
+                            path: ang.path.startsWith('/static/uploads/') ? `${backendBase}${ang.path}` : ang.path
+                        }));
+
                         return {
                             ...d,
                             image_url: safeImage,
+                            angles: safeAngles,
                             tags: Array.isArray(d.tags) ? d.tags : (d.tags ? JSON.parse(d.tags) : []),
                             neck: Array.isArray(d.neck) ? d.neck : (d.neck ? JSON.parse(d.neck) : []),
                             sleeve: Array.isArray(d.sleeve) ? d.sleeve : (d.sleeve ? JSON.parse(d.sleeve) : []),

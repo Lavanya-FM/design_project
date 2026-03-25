@@ -145,14 +145,21 @@ const Customizer = () => {
     const [lastX, setLastX] = useState(0);
 
     // Multi-angle references representing Front, Right, Back, Left structural views
-    const angles = [
-        mainDisplayImage, 
-        '/classic_embroidery.png', 
-        '/bridal_hero.png', 
-        '/modern_blouse.png' 
-    ];
+    // If we have custom uploaded angles, use them!
+    const uploadedAngles = prefill.angles && Array.isArray(prefill.angles) ? prefill.angles : [];
+    
+    const angles = uploadedAngles.length > 0 
+        ? uploadedAngles.map(a => a.path)
+        : [
+            mainDisplayImage, 
+            '/classic_embroidery.png', 
+            '/bridal_hero.png', 
+            '/modern_blouse.png' 
+        ];
 
-    const angleLabels = ["Front View", "Side View", "Back View", "Detail View"];
+    const angleLabels = uploadedAngles.length > 0 
+        ? uploadedAngles.map(a => a.tag)
+        : ["Front View", "Side View", "Back View", "Detail View"];
 
     const handleMouseDown = (e) => {
         setIsDragging(true);

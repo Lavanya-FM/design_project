@@ -7,7 +7,13 @@ from datetime import datetime
 import os
 import json
 
+import uuid
+import base64
+
 app = Flask(__name__)
+
+# Increase request size limit for multiple images (current default is 16MB)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB
 
 # PHASE 7 — BACKEND SETUP
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key'
@@ -18,6 +24,33 @@ app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-s
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 CORS(app)
+
+# Ensure upload directory exists
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def save_base64_image(base64_data):
+    """Saves base64 image data to a file and returns the relative path."""
+    if not base64_data or not base64_data.startswith('data:image'):
+        return base64_data
+    
+    try:
+        # Extract format and data
+        header, encoded = base64_data.split(",", 1)
+        ext = header.split(';')[0].split('/')[1]
+        if ext == 'jpeg': ext = 'jpg'
+        
+        filename = f"{uuid.uuid4()}.{ext}"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        
+        with open(filepath, "wb") as fh:
+            fh.write(base64.b64decode(encoded))
+            
+        return f"/static/uploads/{filename}"
+    except Exception as e:
+        print(f"Error saving image: {e}")
+        return base64_data
 
 # MODELS
 class User(db.Model):
@@ -36,7 +69,8 @@ class Design(db.Model):
     fabric = db.Column(db.JSON)
     work = db.Column(db.JSON)
     tags = db.Column(db.JSON)
-    image = db.Column(db.String(500))
+    image = db.Column(db.Text) # Changed to Text for long base64 or paths
+    angles = db.Column(db.JSON) # Added to store multi-angle paths
     price = db.Column(db.Float)
     popularity = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -89,15 +123,43 @@ def get_designs():
 @app.route('/api/designs', methods=['POST'])
 def create_design():
     data = request.json
+    
+    # Process multiple angles if available in tags (as JSON string) OR as separate angles list
+    raw_angles = data.get('angles', [])
+    # Check if tags has multi-angle JSON (as used by current frontend)
+    tags = data.get('tags', [])
+    processed_angles = []
+    
+    # Extract images from tags if frontend sent them there
+    for t in tags:
+        try:
+            potential_json = json.loads(t)
+            if isinstance(potential_json, list):
+                for img_obj in potential_json:
+                    if 'preview' in img_obj and img_obj['preview']:
+                        path = save_base64_image(img_obj['preview'])
+                        processed_angles.append({'path': path, 'tag': img_obj.get('tag', 'General View')})
+        except:
+            continue
+            
+    # Also handle main image
+    main_image_path = save_base64_image(data.get('image'))
+
     new_design = Design(
-        name=data.get('name'), neck=data.get('neck'), sleeve=data.get('sleeve'),
-        fabric=data.get('fabric'), work=data.get('work'), tags=data.get('tags'),
-        image=data.get('image'), price=data.get('price'), 
+        name=data.get('name'), 
+        neck=data.get('neck'), 
+        sleeve=data.get('sleeve'),
+        fabric=data.get('fabric'), 
+        work=data.get('work'), 
+        tags=data.get('tags'),
+        image=main_image_path, 
+        angles=processed_angles if processed_angles else None,
+        price=data.get('price'), 
         popularity=data.get('popularity', 0)
     )
     db.session.add(new_design)
     db.session.commit()
-    return jsonify({"message": "Design created", "id": new_design.id}), 201
+    return jsonify({"message": "Design created", "id": new_design.id, "image": main_image_path}), 201
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
