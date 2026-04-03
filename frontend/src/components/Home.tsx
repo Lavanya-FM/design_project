@@ -2,14 +2,34 @@ import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { designAPI, Blouse } from '../services/api';
+import CONFIG from '../config';
 import '../styles/Home.css';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const [trending, setTrending] = React.useState<Blouse[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    loadTrending();
   }, []);
+
+  const loadTrending = async () => {
+    try {
+      const data = await designAPI.getTrendingDesigns();
+      setTrending(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getImageUrl = (images: any) => {
+    const url = Array.isArray(images) && images.length > 0 ? images[0] : (typeof images === 'string' && images.startsWith('[') ? JSON.parse(images)[0] : images);
+    if (!url || typeof url !== 'string') return 'https://via.placeholder.com/400x500';
+    if (url.startsWith('http')) return url;
+    return `${CONFIG.API_URL.replace('/api', '')}${url}`;
+  };
 
   return (
     <div className="landing-wrapper">
@@ -75,7 +95,37 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Process Section */}
+      {/* Trending Section */}
+      <section className="trending-section">
+        <div className="container">
+          <div className="featured-header">
+            <h2>Trending Bridal Designs</h2>
+            <p className="text-gray-400 text-sm mt-2 font-bold uppercase tracking-widest">Most Viewed This Week</p>
+            <div className="premium-underline"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-10">
+            {trending.map((design) => (
+              <div key={design.id} className="trending-card group cursor-pointer" onClick={() => navigate(`/designs/${design.id}`)}>
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 shadow-sm group-hover:shadow-2xl transition-all">
+                  <img 
+                    src={getImageUrl(design.images)} 
+                    alt={design.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                  />
+                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black">
+                    TRENDING #{(trending.indexOf(design) + 1)}
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h4 className="text-lg font-black">{design.title}</h4>
+                  <p className="text-sm text-gray-500 uppercase font-black tracking-widest">₹ {design.price}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
       <section id="process" className="process-section">
         <div className="container">
           <div className="featured-header">

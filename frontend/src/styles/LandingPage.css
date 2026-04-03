@@ -101,6 +101,43 @@ h1, h2, h3, h4 {
     margin-bottom: 48px;
 }
 
+.corp-hero-search {
+    display: flex;
+    max-width: 600px;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 30px rgba(10, 25, 47, 0.08);
+}
+
+.corp-hero-search input {
+    flex: 1;
+    padding: 18px 24px;
+    border: 1px solid var(--corp-border);
+    border-radius: 2px 0 0 2px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.corp-hero-search input:focus {
+    border-color: var(--corp-accent);
+}
+
+.corp-hero-search button {
+    background: var(--corp-primary);
+    color: white;
+    border: none;
+    padding: 18px 32px;
+    border-radius: 0 2px 2px 0;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.corp-hero-search button:hover {
+    background: var(--corp-accent);
+}
+
 .btn-corp-primary {
     background: var(--corp-primary);
     color: white;

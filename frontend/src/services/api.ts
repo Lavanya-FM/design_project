@@ -44,12 +44,31 @@ export interface Category {
 }
 
 export interface Blouse {
-  id: number;
+  id: string | number;
   title: string;
   description: string;
-  image_url: string;
-  category?: string;
+  price?: number;
+  is_customizable?: boolean;
+  neck_type?: string;
+  sleeve_type?: string;
+  back_type?: string;
+  work_type?: string;
+  fabric?: string;
+  occasion?: string;
+  images: string[] | string; // Can be JSON string or array
+  story_text?: string;
+  anatomy_json?: string;
+  artisan_name?: string;
+  reviews_json?: string;
   created_at?: string;
+}
+
+export interface DesignResponse {
+  total: number;
+  count: number;
+  page: number;
+  limit: number;
+  designs: Blouse[];
 }
 
 export interface AuthResponse {
@@ -75,39 +94,66 @@ export const authAPI = {
   },
 };
 
-// Blouse API
-export const blouseAPI = {
-  getBlouses: async (filters?: {
-    fabric_type?: string;
+// Blouse API (Now Design-centric)
+export const designAPI = {
+  getDesigns: async (filters?: {
+    neck?: string;
+    sleeve?: string;
+    back?: string;
+    work?: string;
+    fabric?: string;
     occasion?: string;
-  }): Promise<Blouse[]> => {
+    page?: number;
+    limit?: number;
+  }): Promise<DesignResponse> => {
     const params = new URLSearchParams();
-    if (filters?.fabric_type && filters.fabric_type !== 'All Fabrics') {
-      params.append('fabric_type', filters.fabric_type);
-    }
-    if (filters?.occasion) {
-      params.append('occasion', filters.occasion);
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.append(key, value.toString());
+      });
     }
     
-    const url = params.toString() ? `/api/blouses?${params}` : '/api/blouses';
-    const response = await api.get(url);
+    const response = await api.get(`/api/designs?${params.toString()}`);
     return response.data;
   },
 
-  getBlouse: async (id: number): Promise<Blouse> => {
-    const response = await api.get(`/api/blouses/${id}`);
+  searchDesigns: async (query: string): Promise<Blouse[]> => {
+    const response = await api.get(`/api/designs/search?q=${encodeURIComponent(query)}`);
     return response.data;
   },
 
-  createBlouse: async (formData: FormData): Promise<Blouse> => {
-    const response = await api.post('/api/blouses', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  getDesignById: async (id: string | number): Promise<Blouse> => {
+    const response = await api.get(`/api/designs/${id}`);
+    return response.data;
+  },
+
+  getSimilarDesigns: async (id: string | number): Promise<Blouse[]> => {
+    const response = await api.get(`/api/designs/${id}/similar`);
+    return response.data;
+  },
+
+  getTrendingDesigns: async (): Promise<Blouse[]> => {
+    const response = await api.get('/api/designs/trending');
+    return response.data;
+  },
+  saveCustomization: async (data: any): Promise<any> => {
+    const response = await api.post('/api/customize', data);
+    return response.data;
+  },
+
+  trackWishlist: async (id: string | number): Promise<any> => {
+    const response = await api.post(`/api/designs/wishlist/${id}`);
+    return response.data;
+  },
+
+  createDesign: async (designData: Partial<Blouse>): Promise<Blouse> => {
+    const response = await api.post('/api/designs', designData);
     return response.data;
   },
 };
+
+// Keep for backward compatibility if needed, but transition to designAPI
+export const blouseAPI = designAPI as any;
 
 // Category API
 export const categoryAPI = {

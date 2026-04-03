@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { designAPI } from '../services/api';
+import CONFIG from '../config';
 import '../styles/Customizer.css';
 
 const Customizer = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const prefill = location.state?.prefill || {};
+    const [compareTarget, setCompareTarget] = useState(null);
 
     // Extensive Customization Options with Dynamic Pricing!
     const OPTIONS = {
@@ -121,7 +124,11 @@ const Customizer = () => {
     const basePrice = 2500; // Foundational tailoring cost
     const [totalPrice, setTotalPrice] = useState(basePrice);
 
+    const [wishlistDesigns, setWishlistDesigns] = useState([]);
+    const [similarDesigns, setSimilarDesigns] = useState([]);
+
     useEffect(() => {
+        // Price Calculation
         let calculated = basePrice;
         Object.keys(OPTIONS).forEach(category => {
             const selectedLabel = config[category];
@@ -130,6 +137,53 @@ const Customizer = () => {
         });
         setTotalPrice(calculated);
     }, [config]);
+
+    useEffect(() => {
+        // Fetch Wishlist
+        const wishlistIds = JSON.parse(localStorage.getItem('wishlist') || '[]');
+        if (wishlistIds.length > 0) {
+            Promise.all(wishlistIds.map(id => designAPI.getDesignById(id)))
+                .then(data => {
+                    setWishlistDesigns(data.map(d => ({
+                        ...d,
+                        images: typeof d.images === 'string' ? JSON.parse(d.images) : d.images
+                    })));
+                })
+                .catch(console.error);
+        }
+
+        // Fetch Similar or Trending (Fallback)
+        const fetchRecommendations = async () => {
+            try {
+                let data;
+                if (prefill.id) {
+                    data = await designAPI.getSimilarDesigns(prefill.id);
+                } else {
+                    // If customizing from scratch, show trending items as inspiration
+                    const trending = await designAPI.getTrendingDesigns();
+                    data = trending.designs || trending;
+                }
+                
+                if (data && Array.isArray(data)) {
+                    setSimilarDesigns(data.map(d => ({
+                        ...d,
+                        images: typeof d.images === 'string' ? JSON.parse(d.images) : d.images
+                    })));
+                }
+            } catch (err) {
+                console.error("Discovery error:", err);
+                setSimilarDesigns([]); // Prevent perpetual loading screen
+            }
+        };
+
+        fetchRecommendations();
+    }, [prefill.id]);
+
+    const getImageUrl = (images) => {
+        const url = Array.isArray(images) && images.length > 0 ? images[0] : '/modern_blouse.png';
+        if (url.startsWith('http')) return url;
+        return `${CONFIG.API_URL.replace('/api', '')}${url}`;
+    };
 
 
     // Determine safe image to display
@@ -257,7 +311,10 @@ const Customizer = () => {
                     <div className="controls-card">
                         <header className="controls-header">
                             <h1>Bespoke Configuration</h1>
-                            <p>Designing: <strong>{prefill.name || 'Custom Atelier Blouse'}</strong></p>
+                            <p>Designing: <strong>{prefill.title || prefill.name || 'Custom Atelier Blouse'}</strong></p>
+                            {prefill.description && (
+                                <p className="design-desc-mini">{prefill.description}</p>
+                            )}
                         </header>
 
                         <div className="tab-navigation" style={{ flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-start' }}>
@@ -330,6 +387,105 @@ const Customizer = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Wishlist Comparison Section */}
+            {wishlistDesigns.length > 0 && (
+                <section className="comparison-section">
+                    <div className="comparison-header">
+                        <h2>Compare with Wishlist</h2>
+                        <p>Evaluate your favorites alongside your current configuration</p>
+                    </div>
+                    <div className="comparison-grid">
+                        {wishlistDesigns.map(design => (
+                            <div key={design.id} className="comparison-card">
+                                <div className="card-image">
+                                    <img src={getImageUrl(design.images)} alt={design.title} />
+                                    <div className="card-overlay-actions">
+                                        <button onClick={() => navigate('/customize', { state: { prefill: design } })}>Start With This</button>
+                                        <button onClick={() => setCompareTarget(design)}>Side-by-Side</button>
+                                    </div>
+                                </div>
+                                <div className="card-info">
+                                    <h3>{design.title}</h3>
+                                    <button className="mini-compare-btn" onClick={() => setCompareTarget(design)}>Compare Stats</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Comparison Modal */}
+            {compareTarget && (
+                <div className="compare-modal-overlay" onClick={() => setCompareTarget(null)}>
+                    <div className="compare-modal-content" onClick={e => e.stopPropagation()}>
+                        <header className="compare-modal-header">
+                            <h2>Expert Style Comparison</h2>
+                            <button className="close-modal" onClick={() => setCompareTarget(null)}>✕</button>
+                        </header>
+                        <div className="compare-table-container">
+                            <table className="compare-table">
+                                <thead>
+                                    <tr>
+                                        <th>Attribute</th>
+                                        <th>Current Customization</th>
+                                        <th>{compareTarget.title}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Neck Line</td>
+                                        <td>{config['Neck Design']}</td>
+                                        <td>{compareTarget.neck_type}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sleeve Style</td>
+                                        <td>{config['Sleeve Style']}</td>
+                                        <td>{compareTarget.sleeve_type}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fabric</td>
+                                        <td>{config['Fabric Material']}</td>
+                                        <td>{compareTarget.fabric}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Estimate</td>
+                                        <td>₹{totalPrice}</td>
+                                        <td>₹{compareTarget.price}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Similar Designs Section */}
+            <section className="similar-designs-bottom">
+                <div className="comparison-header">
+                    <h2>Inspired by your selection</h2>
+                    <p>More artisanal treasures curated for your style</p>
+                </div>
+                <div className="similar-grid">
+                    {similarDesigns.map(design => (
+                        <div key={design.id} className="similar-mini-card" onClick={() => navigate('/customize', { state: { prefill: design } })}>
+                            <div className="mini-card-image">
+                                <img src={getImageUrl(design.images)} alt={design.title} />
+                            </div>
+                            <div className="mini-card-details">
+                                <h4>{design.title}</h4>
+                                <span>{design.occasion}</span>
+                            </div>
+                        </div>
+                    ))}
+                    {similarDesigns.length === 0 && (
+                        <div className="empty-similar">
+                            <p>Loading recommendations...</p>
+                        </div>
+                    )}
+                </div>
+            </section>
+
             <Footer />
         </div>
     );

@@ -75,9 +75,14 @@ const DesignCard = ({ design, navigate, onFullscreen }) => {
                     <span className="card-cat">{design.category || 'Bridal'}</span>
                     <span className="card-time">🚚 {design.delivery_days || 15} days</span>
                 </div>
-                <h3 className="card-title">{design.name}</h3>
+                <h3 className="card-title" onClick={() => navigate(`/designs/${design.id}`)} style={{ cursor: 'pointer' }}>
+                    {design.title || design.name}
+                </h3>
+                <p className="card-description-mini" style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 10px 0', lineClamp: '2', display: '-webkit-box', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {design.description || 'Exclusive handcrafted design from our atelier.'}
+                </p>
                 {design.work_type && (
-                    <div className="card-work-badge" style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px' }}>
+                    <div className="card-work-badge" style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', color: '#c5a059' }}>
                         ✨ {design.work_type}
                     </div>
                 )}
@@ -111,8 +116,11 @@ const Lightbox = ({ design, allDesigns, onSelect, onClose }) => {
                 <img src={design.image_url || design.image} alt={design.name} className="lightbox-main-img" onError={(e) => { e.target.src = '/classic_embroidery.png'; }} />
 
                 <div className="lightbox-details">
-                    <h3>{design.name}</h3>
-                    <p>{design.work_type || 'Custom Work'} | {design.fabric || 'Silk'}</p>
+                    <h3 style={{ marginBottom: '8px' }}>{design.title || design.name}</h3>
+                    <p style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 'bold' }}>{design.work_type || 'Custom Work'} | {design.fabric || 'Silk'}</p>
+                    <p className="lightbox-desc" style={{ marginTop: '15px', color: '#475569', lineHeight: '1.6', fontSize: '0.95rem' }}>
+                        {design.description || 'Exclusive handcrafted design from our atelier.'}
+                    </p>
                 </div>
 
                 {similarDesigns.length > 0 && (
@@ -321,7 +329,7 @@ const Collections = () => {
 
                         {/* Determine Display Designs */}
                         {(() => {
-                            const designsToShow = isAuthenticated ? filteredDesigns : filteredDesigns.slice(0, 4);
+                            const designsToShow = filteredDesigns;
                             
                             return (
                                 <>
@@ -339,30 +347,6 @@ const Collections = () => {
                                         </div>
                                     )}
 
-                                    {/* Call To Action for Unauthenticated Users */}
-                                    {!isAuthenticated && filteredDesigns.length > 4 && (
-                                        <div className="collection-auth-cta" style={{
-                                            marginTop: '60px', 
-                                            padding: '50px 30px', 
-                                            background: '#ffffff', 
-                                            border: '1px solid #e2e8f0', 
-                                            borderRadius: '2px', 
-                                            textAlign: 'center', 
-                                            boxShadow: '0 10px 30px rgba(10, 25, 47, 0.05)'
-                                        }}>
-                                            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '2.2rem', color: '#0A192F', marginBottom: '16px' }}>Unlock the Full Atelier Collection</h2>
-                                            <p style={{ color: '#64748b', fontSize: '1rem', maxWidth: '600px', margin: '0 auto 30px auto', lineHeight: '1.6' }}>
-                                                You are currently viewing a limited preview. Sign up or log in to explore hundreds of exclusive bespoke designs, unlock 360° customization, and book structural tailoring consultations.
-                                            </p>
-                                            <button 
-                                                className="btn-customize-cta" 
-                                                onClick={() => navigate('/auth/role-selection')}
-                                                style={{ padding: '16px 40px', fontSize: '0.9rem' }}
-                                            >
-                                                LOGIN / SIGNUP TO VIEW MORE
-                                            </button>
-                                        </div>
-                                    )}
                                 </>
                             );
                         })()}

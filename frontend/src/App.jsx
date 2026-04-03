@@ -16,6 +16,7 @@ const DesignerPortal = lazy(() => import('./pages/DesignerPortal'));
 const TailorDashboard = lazy(() => import('./pages/TailorDashboard'));
 const VendorDashboard = lazy(() => import('./pages/VendorDashboard'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
+const DesignDetail = lazy(() => import('./pages/DesignDetail'));
 
 // 🔐 AUTH SUITE
 const RoleSelection = lazy(() => import('./pages/auth/RoleSelection'));
@@ -100,6 +101,7 @@ function App() {
 
                     {/* Customer Dashboard */}
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/designs/:id" element={<DesignDetail />} />
                     <Route path="/order/:id" element={<OrderTracking />} />
                     <Route path="/order/success" element={<OrderSuccess />} />
 

@@ -3,6 +3,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Home from './components/Home';
 import Login from './components/Login';
 import Gallery from './components/Gallery';
+import DesignDetail from './pages/DesignDetail';
+import CustomizeForm from './pages/CustomizeForm';
+import DesignerDashboard from './pages/DesignerDashboard';
+import DesignerOrderDetail from './pages/DesignerOrderDetail';
+import OrderTracking from './pages/OrderTracking';
+import AdminDashboard from './pages/AdminDashboard';
 import './styles.css';
 
 interface User {
@@ -66,6 +72,30 @@ function App() {
             element={
               user ? <Gallery /> : <Navigate to="/login" />
             } 
+          />
+          <Route 
+            path="/designs/:id" 
+            element={<DesignDetail />} 
+          />
+          <Route 
+            path="/customize/:id" 
+            element={<CustomizeForm />} 
+          />
+          <Route 
+            path="/designer/dashboard" 
+            element={<DesignerDashboard />} 
+          />
+          <Route 
+            path="/designer/orders/:id" 
+            element={<DesignerOrderDetail />} 
+          />
+          <Route 
+            path="/orders/tracking" 
+            element={<OrderTracking />} 
+          />
+          <Route 
+            path="/admin/dashboard" 
+            element={<AdminDashboard />} 
           />
         </Routes>
       </div>

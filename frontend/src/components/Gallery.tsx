@@ -1,358 +1,384 @@
-import React, { useState, useEffect } from 'react';
-import { blouseAPI, categoryAPI, Blouse, Category } from '../services/api';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { designAPI, Blouse } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import CONFIG from '../config';
+import Skeleton from './Skeleton';
 
 const Gallery: React.FC = () => {
-  const [blouses, setBlouses] = useState<Blouse[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedFabric, setSelectedFabric] = useState('All Fabrics');
-  const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
+    const [designs, setDesigns] = useState<Blouse[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [error, setError] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [wishlist, setWishlist] = useState<string[]>([]);
+    
+    // Load wishlist
+    useEffect(() => {
+        const saved = localStorage.getItem('wishlist');
+        if (saved) setWishlist(JSON.parse(saved));
+    }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [selectedFabric, selectedOccasions]);
+    const toggleWishlist = (id: string | number) => {
+        const idStr = id.toString();
+        const isAdding = !wishlist.includes(idStr);
+        const updated = isAdding 
+            ? [...wishlist, idStr]
+            : wishlist.filter(i => i !== idStr);
+            
+        setWishlist(updated);
+        localStorage.setItem('wishlist', JSON.stringify(updated));
+        window.dispatchEvent(new Event('wishlistUpdate'));
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [blousesData, categoriesData] = await Promise.all([
-        blouseAPI.getBlouses({
-          fabric_type: selectedFabric,
-          occasion: selectedOccasions.join(','),
-        }),
-        categoryAPI.getCategories(),
-      ]);
-      
-      setBlouses(blousesData);
-      setCategories(categoriesData);
-    } catch (err: any) {
-      setError('Failed to load data');
-      console.error('Error loading data:', err);
-    } finally {
-      setLoading(false);
+        if (isAdding) {
+            designAPI.trackWishlist(id).catch(console.error);
+        }
+    };
+    interface Filters {
+        neck: string;
+        sleeve: string;
+        work: string;
+        occasion: string;
+        fabric: string;
+        [key: string]: string;
     }
-  };
 
-  const handleFabricChange = (fabric: string) => {
-    setSelectedFabric(fabric);
-  };
+    const [filters, setFilters] = useState<Filters>({
+        neck: '',
+        sleeve: '',
+        work: '',
+        occasion: '',
+        fabric: ''
+    });
 
-  const handleOccasionToggle = (occasion: string) => {
-    setSelectedOccasions(prev =>
-      prev.includes(occasion)
-        ? prev.filter(o => o !== occasion)
-        : [...prev, occasion]
+    const navigate = useNavigate();
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastDesignElementRef = useCallback((node: HTMLDivElement) => {
+        if (loading || loadingMore) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, loadingMore, hasMore]);
+
+    const [totalCount, setTotalCount] = useState(0);
+
+    const loadDesigns = async (currentPage: number, currentFilters: any, reset = false) => {
+        try {
+            if (reset) {
+                setLoading(true);
+            } else {
+                setLoadingMore(true);
+            }
+
+            const response = await designAPI.getDesigns({
+                ...currentFilters,
+                page: currentPage,
+                limit: 12
+            });
+
+            const newDesigns = response.designs.map(d => ({
+                ...d,
+                // Ensure images is an array
+                images: typeof d.images === 'string' ? JSON.parse(d.images) : d.images
+            }));
+
+            setTotalCount(response.total);
+            setDesigns(prev => {
+                const updated = reset ? newDesigns : [...prev, ...newDesigns];
+                setHasMore(updated.length < response.total);
+                return updated;
+            });
+            setError('');
+        } catch (err: any) {
+            console.error('Error loading designs:', err);
+            setError('Unable to load designs. Showing sample data.');
+            if (reset) setDesigns(SAMPLE_DATA);
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    };
+
+    // Load initial data
+    useEffect(() => {
+        loadDesigns(page, filters, true);
+    }, [filters]);
+
+    // Handle initial scroll/mounting and page changes
+    useEffect(() => {
+        if (page > 1) {
+            loadDesigns(page, filters, false);
+        }
+    }, [page]);
+
+    const handleFilterChange = (key: string, value: string) => {
+        setFilters(prev => ({ ...prev, [key]: prev[key] === value ? '' : value }));
+        setPage(1); // Reset to first page
+    };
+
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!searchTerm) {
+            setPage(1);
+            loadDesigns(1, filters, true);
+            return;
+        }
+        try {
+            setLoading(true);
+            const results = await designAPI.searchDesigns(searchTerm);
+            setDesigns(results.map(d => ({
+                ...d,
+                images: typeof d.images === 'string' ? JSON.parse(d.images) : d.images
+            })));
+            setHasMore(false);
+        } catch (err) {
+            setError('Search failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getImageUrl = (images: any) => {
+        const url = Array.isArray(images) && images.length > 0 ? images[0] : 'https://via.placeholder.com/400x500';
+        if (url.startsWith('http')) return url;
+        return `${CONFIG.API_URL.replace('/api', '')}${url}`;
+    };
+
+    return (
+        <div className="min-h-screen bg-[#FDFBF9] text-[#2D2D2D] font-sans">
+            {/* Header / Navbar */}
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-4">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-12">
+                        <h1 className="text-2xl font-black tracking-tighter text-purple-900 cursor-pointer" onClick={() => navigate('/')}>
+                            ATELIER <span className="font-light text-gray-400">FIT & FLARE</span>
+                        </h1>
+                        <nav className="hidden lg:flex gap-8 text-sm font-medium text-gray-500 uppercase tracking-widest">
+                            <a href="#" className="hover:text-purple-600 transition">Collections</a>
+                            <a href="#" className="hover:text-purple-600 transition">Customizer</a>
+                            <a href="#" className="hover:text-purple-600 transition">Atelier</a>
+                        </nav>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                        <form onSubmit={handleSearch} className="relative group">
+                            <input 
+                                type="text" 
+                                placeholder="Search designs..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="bg-gray-100 rounded-full px-6 py-2 pl-12 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all w-64 group-hover:w-80"
+                            />
+                            <svg className="absolute left-4 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </form>
+                        <button className="relative">
+                            <svg className="w-6 h-6 text-gray-700" fill={wishlist.length > 0 ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            {wishlist.length > 0 && <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full pulse">{wishlist.length}</span>}
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main className="max-w-7xl mx-auto px-6 py-12 flex gap-10">
+                {/* Filters Sidebar */}
+                <aside className="w-64 flex-shrink-0 hidden lg:block">
+                    <div className="sticky top-28 space-y-10">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xs uppercase tracking-widest font-black text-gray-400">Filters</h2>
+                            <button 
+                                onClick={() => { setFilters({ neck: '', sleeve: '', work: '', occasion: '', fabric: '' }); setPage(1); }}
+                                className="text-[10px] uppercase font-bold text-purple-600 hover:text-purple-800"
+                            >
+                                Reset
+                            </button>
+                        </div>
+
+                        {FILTER_SECTIONS.map(section => (
+                            <div key={section.id} className="space-y-4">
+                                <h3 className="text-sm font-bold">{section.title}</h3>
+                                <div className="space-y-2">
+                                    {section.options.map(opt => (
+                                        <label key={opt.value} className="flex items-center gap-3 cursor-pointer group">
+                                            <input 
+                                                type="checkbox" 
+                                                className="w-4 h-4 rounded border-gray-200 text-purple-600 focus:ring-purple-200 transition-all"
+                                                checked={filters[section.id as keyof typeof filters] === opt.value}
+                                                onChange={() => handleFilterChange(section.id, opt.value)}
+                                            />
+                                            <span className={`text-sm tracking-tight transition-colors ${filters[section.id as keyof typeof filters] === opt.value ? 'text-purple-600 font-bold' : 'text-gray-500 group-hover:text-gray-900'}`}>
+                                                {opt.label}
+                                            </span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </aside>
+
+                {/* Design Grid */}
+                <section className="flex-1">
+                    <div className="mb-10 flex items-end justify-between">
+                        <div>
+                            <h1 className="text-4xl font-black tracking-tight mb-2">Curated Designs</h1>
+                            <p className="text-gray-500 max-w-lg">Discover master-crafted blouse designs, tailored to perfection by our expert artisans.</p>
+                        </div>
+                        <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                            Showing <span className="text-black">{designs.length} of {totalCount}</span> Masterpieces
+                        </div>
+                    </div>
+
+                    {loading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="space-y-4">
+                                    <Skeleton className="aspect-[4/5] w-full rounded-2xl" />
+                                    <Skeleton className="h-6 w-3/4" />
+                                    <Skeleton className="h-4 w-1/2" />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                            {designs.map((design, index) => (
+                                <div 
+                                    key={design.id} 
+                                    ref={index === designs.length - 1 ? lastDesignElementRef : null}
+                                    className="group cursor-pointer"
+                                    onClick={() => navigate(`/designs/${design.id}`)}
+                                >
+                                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 mb-4 shadow-sm group-hover:shadow-xl transition-all duration-500">
+                                        <img 
+                                            src={getImageUrl(design.images)} 
+                                            alt={design.title}
+                                            loading="lazy"
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.src = `https://picsum.photos/seed/${design.id}/800/1000`;
+                                            }}
+                                        />
+                                        <div className="absolute top-4 right-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); toggleWishlist(design.id); }}
+                                                className={`backdrop-blur p-3 rounded-full transition-colors ${wishlist.includes(design.id.toString()) ? 'bg-purple-600 text-white' : 'bg-white/90 text-gray-700 hover:bg-purple-600 hover:text-white'}`}
+                                            >
+                                                <svg className="w-5 h-5" fill={wishlist.includes(design.id.toString()) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        {design.price && (
+                                            <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full text-xs font-black shadow-sm">
+                                                ₹ {design.price}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-lg font-black group-hover:text-purple-600 transition-colors">{design.title}</h3>
+                                            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">{design.occasion}</span>
+                                        </div>
+                                        <p className="text-gray-500 text-sm line-clamp-1">{design.description}</p>
+                                        <div className="flex gap-2 pt-2">
+                                            {design.work_type && <span className="text-[9px] bg-purple-50 text-purple-700 px-2 py-1 rounded font-bold uppercase">{design.work_type}</span>}
+                                            {design.fabric && <span className="text-[9px] bg-gray-100 text-gray-600 px-2 py-1 rounded font-bold uppercase">{design.fabric}</span>}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {loadingMore && (
+                        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className="space-y-4">
+                                    <Skeleton className="aspect-[4/5] w-full rounded-2xl" />
+                                    <Skeleton className="h-6 w-3/4" />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
+            </main>
+        </div>
     );
-  };
-
-  const clearFilters = () => {
-    setSelectedFabric('All Fabrics');
-    setSelectedOccasions([]);
-    setSearchTerm('');
-  };
-
-  const fabricCategories = categories.filter(cat => cat.type === 'fabric');
-  const occasionCategories = categories.filter(cat => cat.type === 'occasion');
-
-  // Sample data for demonstration with proper images
-  const sampleBlouses: Blouse[] = [
-    {
-      id: 1,
-      title: "Traditional Silks",
-      description: "Rich Banarasi and Kanjeevaram textures adorned with meticulous Zardozi handwork.",
-      image_url: "https://picsum.photos/seed/silk1/400/500.jpg",
-    },
-    {
-      id: 2,
-      title: "Contemporary Cottons",
-      description: "Breathable, organic weaves featuring modern silhouettes and understated wooden button details.",
-      image_url: "https://picsum.photos/seed/cotton1/400/500.jpg",
-    },
-    {
-      id: 3,
-      title: "Designer Backs",
-      description: "A focus on the unexpected. Geometric cut-outs, tie-up latkans, and sheer panelling.",
-      image_url: "https://picsum.photos/seed/designer1/400/500.jpg",
-    },
-    {
-      id: 4,
-      title: "Ethereal Organza",
-      description: "Light-as-air fabrics paired with delicate floral appliques and glass bead embroidery.",
-      image_url: "https://picsum.photos/seed/organza1/400/500.jpg",
-    },
-    {
-      id: 5,
-      title: "Velvet Nights",
-      description: "Rich, plush velvets in jewel tones, perfect for winter weddings and grand galas.",
-      image_url: "https://picsum.photos/seed/velvet1/400/500.jpg",
-    },
-    {
-      id: 6,
-      title: "Indigo Tales",
-      description: "Hand-block printed Ajrakh and Dabu cottons celebrating ancient dyeing traditions.",
-      image_url: "https://picsum.photos/seed/indigo1/400/500.jpg",
-    },
-    {
-      id: 7,
-      title: "Royal Brocade",
-      description: "Opulent brocade patterns with gold and silver threads, fit for royalty.",
-      image_url: "https://picsum.photos/seed/brocade1/400/500.jpg",
-    },
-    {
-      id: 8,
-      title: "Minimalist Chic",
-      description: "Clean lines and subtle elegance for the modern woman who appreciates simplicity.",
-      image_url: "https://picsum.photos/seed/minimal1/400/500.jpg",
-    },
-    {
-      id: 9,
-      title: "Bohemian Rhapsody",
-      description: "Free-spirited designs with tassels, mirrors, and ethnic embroidery patterns.",
-      image_url: "https://picsum.photos/seed/boho1/400/500.jpg",
-    },
-  ];
-
-  const displayBlouses = blouses.length > 0 ? blouses : sampleBlouses;
-
-  const filteredBlouses = displayBlouses.filter(blouse =>
-    blouse.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    blouse.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="navbar sticky" style={{position: 'sticky', top: '0', zIndex: 40}}>
-        <div className="container">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold text-gray-800">FIT & FLARE STUDIO</h1>
-              <nav className="nav-links" style={{display: 'flex', gap: '1.5rem'}}>
-                <button onClick={() => navigate('/')} className="text-gray-600 hover:text-gray-900">Home</button>
-                <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900">How it Works</a>
-                <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search collections..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
-                  style={{paddingLeft: '2.5rem', outline: 'none', border: '1px solid #d1d5db', width: '250px'}}
-                />
-                <i className="fas fa-search absolute left-3 top-3 text-gray-400" style={{position: 'absolute', left: '0.75rem', top: '0.75rem'}}></i>
-              </div>
-              <button 
-                onClick={() => navigate('/login')}
-                className="btn btn-primary"
-              >
-                Book Consultation
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="container py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <aside className="lg:w-1/4">
-            <div className="bg-white rounded-lg shadow-md p-6" style={{position: 'sticky', top: '6rem'}}>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">Filters</h2>
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-purple-600 hover:text-purple-800 transition"
-                >
-                  Clear All
-                </button>
-              </div>
-
-              {/* Fabric Type */}
-              <div className="mb-6">
-                <h3 className="font-semibold mb-3 text-gray-900">FABRIC TYPE</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="fabric"
-                      value="All Fabrics"
-                      checked={selectedFabric === 'All Fabrics'}
-                      onChange={(e) => handleFabricChange(e.target.value)}
-                      className="mr-2"
-                    />
-                    <span className="text-gray-700">All Fabrics</span>
-                  </label>
-                  {fabricCategories.map(category => (
-                    <label key={category.id} className="flex items-center cursor-pointer">
-                      <input
-                        type="radio"
-                        name="fabric"
-                        value={category.name}
-                        checked={selectedFabric === category.name}
-                        onChange={(e) => handleFabricChange(e.target.value)}
-                        className="mr-2"
-                      />
-                      <span className="text-gray-700">{category.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Occasion */}
-              <div className="mb-6">
-                <h3 className="font-semibold mb-3 text-gray-900">OCCASION</h3>
-                <div className="flex flex-wrap gap-2">
-                  {occasionCategories.map(category => (
-                    <button
-                      key={category.id}
-                      className={`px-3 py-1 border rounded-full text-sm transition ${
-                        selectedOccasions.includes(category.name)
-                          ? 'bg-purple-600 text-white border-purple-600'
-                          : 'border-gray-300 hover:bg-purple-600 hover:text-white hover:border-purple-600'
-                      }`}
-                      onClick={() => handleOccasionToggle(category.name)}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Our Promise */}
-              <div className="mt-6 p-4 bg-purple-50 rounded-lg">
-                <h4 className="font-semibold text-purple-900 mb-2">OUR PROMISE</h4>
-                <p className="text-sm text-purple-700">
-                  Each design can be customized to your specific measurements and fabric preferences during your consultation.
-                </p>
-              </div>
-            </div>
-          </aside>
-
-          {/* Gallery Content */}
-          <main className="lg:w-3/4">
-            {/* Gallery Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Artisan Blouse Gallery</h1>
-              <p className="text-gray-600 max-w-3xl mb-8">
-                Explore our curated selection of bespoke blouse designs, from heritage hand-woven silks to contemporary minimalist cuts. Each piece is a testament to premium hand-crafted tailoring.
-              </p>
-              <div className="flex items-center justify-between">
-                <p className="text-gray-600">
-                  Showing <span className="font-semibold">{filteredBlouses.length}</span> designs
-                </p>
-                <select className="border border-gray-300 rounded-lg px-4 py-2">
-                  <option>Sort by: Featured</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Newest First</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Loading State */}
-            {loading && (
-              <div className="flex justify-center py-12">
-                <div className="spinner"></div>
-              </div>
-            )}
-
-            {/* Error State */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                {error}
-              </div>
-            )}
-
-            {/* Blouse Grid */}
-            {!loading && !error && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                {filteredBlouses.map(blouse => (
-                  <div key={blouse.id} className="bg-white rounded-lg shadow-md overflow-hidden hover-lift">
-                    <div className="image-hover" style={{height: '20rem'}}>
-                      <img
-                        src={blouse.image_url}
-                        alt={blouse.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = `https://picsum.photos/seed/blouse${blouse.id}/400/500.jpg`;
-                        }}
-                      />
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-semibold mb-2 text-gray-900">{blouse.title}</h3>
-                      <p className="text-gray-600 mb-4">{blouse.description}</p>
-                      <div className="flex space-x-2">
-                        <button
-                          className="flex-1 btn btn-primary"
-                          onClick={() => alert(`View details for: ${blouse.title}`)}
-                        >
-                          View Details
-                        </button>
-                        <button
-                          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                          onClick={() => alert(`Save ${blouse.title} to favorites`)}
-                        >
-                          <i className="far fa-heart"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* The Art of the Stitch Section */}
-            <section className="bg-gray-50 rounded-lg p-8 mb-8">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">The Art of the Stitch</h2>
-                  <p className="text-gray-600 mb-6">
-                    At FIT & FLARE STUDIO, we believe a blouse is more than just a garment; it's the anchor of your ensemble. Our master tailors bring over three decades of experience to every cut and every stitch. From the precise placement of a dart to the hand-finished edging of a neckline, our craftsmanship is obsessed with the details that define luxury.
-                  </p>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">15+</div>
-                      <div className="text-sm text-gray-600">MASTER TAILORS</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">100%</div>
-                      <div className="text-sm text-gray-600">CUSTOM FIT</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600">48h</div>
-                      <div className="text-sm text-gray-600">CONSULTATION TURNAROUND</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-center">
-                  <img
-                    src="https://picsum.photos/seed/tailorcraft/400/300.jpg"
-                    alt="Craftsmanship"
-                    className="rounded-lg shadow-md"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = `https://picsum.photos/seed/craft/400/300.jpg`;
-                    }}
-                  />
-                </div>
-              </div>
-            </section>
-          </main>
-        </div>
-      </div>
-    </div>
-  );
 };
+
+const FILTER_SECTIONS = [
+    {
+        id: 'neck',
+        title: 'Neck Type',
+        options: [
+            { label: 'Boat Neck', value: 'boat' },
+            { label: 'Deep Back', value: 'deep_back' },
+            { label: 'Halter', value: 'halter' },
+            { label: 'V-Neck', value: 'v_neck' }
+        ]
+    },
+    {
+        id: 'sleeve',
+        title: 'Sleeve',
+        options: [
+            { label: 'Sleeveless', value: 'sleeveless' },
+            { label: 'Short Sleeve', value: 'short' },
+            { label: 'Elbow Length', value: 'elbow' },
+            { label: 'Full Sleeve', value: 'full' }
+        ]
+    },
+    {
+        id: 'work',
+        title: 'Work Type',
+        options: [
+            { label: 'Aari Work', value: 'aari' },
+            { label: 'Embroidery', value: 'embroidery' },
+            { label: 'Zari', value: 'zari' },
+            { label: 'Plain', value: 'plain' }
+        ]
+    },
+    {
+        id: 'occasion',
+        title: 'Occasion',
+        options: [
+            { label: 'Bridal', value: 'bridal' },
+            { label: 'Reception', value: 'reception' },
+            { label: 'Party', value: 'party' },
+            { label: 'Casual', value: 'casual' }
+        ]
+    }
+];
+
+const SAMPLE_DATA: Blouse[] = [
+    {
+        id: 's1',
+        title: 'Royal Bridal Aari',
+        description: 'Deep red silk blouse with heavy gold aari work and peacock motifs.',
+        price: 4500,
+        images: ['https://picsum.photos/seed/bridal1/800/1000'],
+        occasion: 'bridal',
+        work_type: 'aari',
+        fabric: 'silk'
+    },
+    {
+        id: 's2',
+        title: 'Modern Silver Halter',
+        description: 'Contemporary silver tissue blouse with minimal sequin finish.',
+        price: 2800,
+        images: ['https://picsum.photos/seed/halter1/800/1000'],
+        occasion: 'reception',
+        work_type: 'embroidery',
+        fabric: 'tissue'
+    }
+];
 
 export default Gallery;

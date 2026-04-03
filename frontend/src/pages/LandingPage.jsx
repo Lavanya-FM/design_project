@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -8,6 +8,7 @@ import '../styles/LandingPage.css';
 
 const LandingPage = () => {
     const navigate = useNavigate();
+    const [heroSearch, setHeroSearch] = useState('');
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 30 },
@@ -45,6 +46,18 @@ const LandingPage = () => {
                         <motion.p variants={fadeInUp}>
                             Elevate your special day with our signature bespoke blouses. We specialize in intricate maggam work, aari embroidery, and elegant silhouettes designed explicitly for the modern bride.
                         </motion.p>
+                        <motion.div variants={fadeInUp} className="corp-hero-search">
+                            <input 
+                                type="text" 
+                                placeholder="Search styles (e.g. Zardozi, Boat Neck)..." 
+                                value={heroSearch}
+                                onChange={(e) => setHeroSearch(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if(e.key === 'Enter') navigate(`/collections?search=${encodeURIComponent(heroSearch)}`)
+                                }}
+                            />
+                            <button onClick={() => navigate(`/collections?search=${encodeURIComponent(heroSearch)}`)}>Search</button>
+                        </motion.div>
                         <motion.div variants={fadeInUp} className="corp-button-group">
                             <button className="btn-corp-primary" onClick={() => navigate('/customizer')}>
                                 Design Your Blouse

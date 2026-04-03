@@ -10,23 +10,52 @@ const DesignerPortal = () => {
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState('studio');
     const [uploadPreview, setUploadPreview] = useState(null);
+    const [base64Image, setBase64Image] = useState(null);
     const [loading, setLoading] = useState(false);
     const [myDesigns, setMyDesigns] = useState([]);
 
+    const fetchMyDesigns = async () => {
+        try {
+            const res = await axios.get(`${CONFIG.API_URL}/designs`);
+            setMyDesigns(res.data);
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            // Don't show toast on initial load if it's just a connection issue in mock mode
+        }
+    };
+
     useEffect(() => {
-        const fetchMyDesigns = async () => {
-            try {
-                const res = await axios.get(`${CONFIG.API_URL}/designs`);
-                setMyDesigns(res.data.slice(0, 4)); // Mocking just a few as "mine"
-            } catch (err) {
-                console.error("Fetch Error:", err);
-            }
-        };
         fetchMyDesigns();
     }, []);
 
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setUploadPreview(URL.createObjectURL(file));
+            try {
+                const base64 = await convertToBase64(file);
+                setBase64Image(base64);
+            } catch (err) {
+                showToast("Error processing image", "error");
+            }
+        }
+    };
+
     const handleUpload = async (e) => {
         e.preventDefault();
+        if (!base64Image) {
+            showToast("Please upload a design image", "error");
+            return;
+        }
         setLoading(true);
 
         const formData = {
@@ -38,8 +67,9 @@ const DesignerPortal = () => {
             sleeve: [e.target['des-sleeve'].value],
             fabric: [e.target['des-fabric'].value],
             work_type: e.target['des-work'].value,
+            tags: [e.target['des-cat'].value.toLowerCase(), e.target['des-work'].value.toLowerCase()],
             props: e.target['des-props'].value.split(',').map(s => s.trim()),
-            image: uploadPreview,
+            image: base64Image,
             status: 'Active'
         };
 
@@ -48,12 +78,22 @@ const DesignerPortal = () => {
             showToast("Design Published Successfully!", "success");
             e.target.reset();
             setUploadPreview(null);
+            setBase64Image(null);
+            fetchMyDesigns();
             setActiveTab('portfolio');
         } catch (err) {
             showToast("Failed to publish design. Please try again.", "error");
+            console.error(err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const getFullImageUrl = (url) => {
+        if (!url) return 'https://via.placeholder.com/400x500?text=No+Image';
+        if (url.startsWith('http')) return url;
+        const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+        return `${CONFIG.API_URL.replace('/api', '')}${cleanUrl}`;
     };
 
     return (
@@ -75,8 +115,8 @@ const DesignerPortal = () => {
                         <section className="op-stats-grid">
                             <div className="op-stat-card primary">
                                 <h4>Total Designs</h4>
-                                <div className="op-stat-val">12</div>
-                                <p style={{ fontSize: '0.75rem', color: '#666' }}>8 Active in Gallery</p>
+                                <div className="op-stat-val">{myDesigns.length || 0}</div>
+                                <p style={{ fontSize: '0.75rem', color: '#666' }}>Active in Gallery</p>
                             </div>
                             <div className="op-stat-card success">
                                 <h4>Order Hits</h4>
@@ -166,10 +206,7 @@ const DesignerPortal = () => {
                                     <div className="form-group" style={{ gridColumn: 'span 2' }}>
                                         <label className="form-label">High-Res Design Photo</label>
                                         <div className="upload-zone" style={{ minHeight: '200px' }} onClick={() => document.getElementById('des-file').click()}>
-                                            <input type="file" id="des-file" hidden onChange={(e) => {
-                                                const file = e.target.files[0];
-                                                if (file) setUploadPreview(URL.createObjectURL(file));
-                                            }} />
+                                            <input type="file" id="des-file" hidden onChange={handleFileChange} accept="image/*" />
                                             {uploadPreview ? (
                                                 <img src={uploadPreview} style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '12px' }} />
                                             ) : (
@@ -195,14 +232,15 @@ const DesignerPortal = () => {
                             {myDesigns.map(design => (
                                 <div key={design.id} className="dash-card" style={{ padding: 0, overflow: 'hidden' }}>
                                     <div style={{ position: 'relative' }}>
-                                        <img src={design.image} style={{ width: '100%', height: '200px', objectFit: 'cover' }} alt="" />
+                                        <img src={getFullImageUrl(design.image_url)} style={{ width: '100%', height: '240px', objectFit: 'cover' }} alt={design.name} />
                                         <span className="status-pill active" style={{ position: 'absolute', top: '10px', right: '10px' }}>Active</span>
                                     </div>
                                     <div style={{ padding: '16px' }}>
                                         <h4 style={{ marginBottom: '8px' }}>{design.name}</h4>
+                                        <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '12px' }}>{design.category} • {design.work_type}</p>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>₹{design.price}</span>
-                                            <button className="btn-text btn-sm" style={{ padding: 0 }}>Edit Details</button>
+                                            <button className="btn-text btn-sm" style={{ padding: 0 }}>View Stats</button>
                                         </div>
                                     </div>
                                 </div>

@@ -154,7 +154,17 @@
 .controls-header p {
     font-size: 0.9rem;
     color: var(--color-text-muted);
-    margin-bottom: 40px;
+    margin-bottom: 8px;
+}
+
+.design-desc-mini {
+    font-size: 0.85rem !important;
+    font-weight: 500;
+    line-height: 1.6;
+    margin-bottom: 30px !important;
+    max-width: 90%;
+    border-left: 3px solid var(--color-accent);
+    padding-left: 15px;
 }
 
 /* Tabs */
@@ -266,4 +276,283 @@
         grid-template-columns: 1fr;
         height: auto;
     }
+}
+
+/* Comparison & Similar Sections */
+.comparison-section, .similar-designs-bottom {
+    padding: 80px 60px;
+    background: white;
+    border-top: 1px solid #f1f5f9;
+}
+
+.comparison-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.comparison-header h2 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    color: #0A192F;
+}
+
+.comparison-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.comparison-card {
+    background: #f8fafc;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #e2e8f0;
+}
+
+.comparison-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    border-color: #C5A059;
+}
+
+.card-image {
+    position: relative;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.comparison-card:hover .card-image img {
+    transform: scale(1.1);
+}
+
+.card-overlay-actions {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 25, 47, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.card-overlay-actions button {
+    background: white;
+    color: #0A192F;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    width: 80%;
+    transition: all 0.2s;
+}
+
+.card-overlay-actions button:hover {
+    background: #C5A059;
+    color: white;
+}
+
+.comparison-card:hover .card-overlay-actions {
+    opacity: 1;
+}
+
+.mini-compare-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: none;
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mini-compare-btn:hover {
+    border-color: #0A192F;
+    color: #0A192F;
+}
+
+/* Modal Styling */
+.compare-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.compare-modal-content {
+    background: white;
+    width: 100%;
+    max-width: 800px;
+    border-radius: 4px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    overflow: hidden;
+    animation: modalSlide 0.4s ease-out;
+}
+
+@keyframes modalSlide {
+    0% { transform: translateY(40px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.compare-modal-header {
+    padding: 30px;
+    background: #0A192F;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.compare-table-container {
+    padding: 40px;
+}
+
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.compare-table th, .compare-table td {
+    padding: 20px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.compare-table th {
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: #94a3b8;
+}
+
+.compare-table td {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0A192F;
+}
+
+.compare-table td:first-child {
+    font-weight: 800;
+    color: #64748b;
+    width: 30%;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.card-info {
+    padding: 20px;
+}
+
+.card-info h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.spec {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.card-info .price {
+    margin-top: 15px;
+    font-weight: 900;
+    color: #C5A059;
+    font-size: 1.1rem;
+}
+
+/* Similar Designs Bottom */
+.similar-grid {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 20px 0;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+
+.similar-grid::-webkit-scrollbar {
+    display: none;
+}
+
+.similar-mini-card {
+    min-width: 200px;
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s;
+}
+
+.similar-mini-card:hover {
+    border-color: #0A192F;
+    background: #f8fafc;
+}
+
+.mini-card-image {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.mini-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mini-card-details h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.mini-card-details span {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    font-weight: 600;
 }

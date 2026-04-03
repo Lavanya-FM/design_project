@@ -10,6 +10,7 @@ const Navbar = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [wishlistCount, setWishlistCount] = useState(0);
 
     // Check user session
     const userString = localStorage.getItem('user');
@@ -20,9 +21,24 @@ const Navbar = () => {
     const SUGGESTIONS = ['Deep back blouse', 'Boat neck', 'Wedding blouse', 'Puff sleeve', 'Silk blouse', 'Zardosi work'];
 
     useEffect(() => {
+        const updateWishlistCount = () => {
+            const saved = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            setWishlistCount(saved.length);
+        };
+
+        updateWishlistCount();
+        window.addEventListener('storage', updateWishlistCount);
+        // Custom event for same-window updates
+        window.addEventListener('wishlistUpdate', updateWishlistCount);
+
         const handleScroll = () => setScrolled(window.scrollY > 50);
         window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('storage', updateWishlistCount);
+            window.removeEventListener('wishlistUpdate', updateWishlistCount);
+        };
     }, []);
 
     const handleSearch = (e) => {
@@ -59,7 +75,8 @@ const Navbar = () => {
                     <span className="logo-sparkle">✨</span>Fit & Flare<sup className="logo-studio">Studio</sup>
                 </Link>
 
-                {!isLanding && (
+                {/* Always visible search for accessibility */}
+                {(true) && (
                     <div className="navbar-search">
                         <div className="search-input-wrapper" style={{ width: '100%', position: 'relative', display: 'flex', alignItems: 'center' }}>
                             <span className="search-icon">🔍</span>
@@ -100,6 +117,11 @@ const Navbar = () => {
                         <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
                         <Link to="/collections" onClick={() => setMenuOpen(false)}>Styles</Link>
                         <Link to="/customizer" onClick={() => setMenuOpen(false)}>Design Studio</Link>
+
+                        <Link to="/wishlist" className="navbar-item-relative" onClick={() => setMenuOpen(false)}>
+                            ❤️
+                            {wishlistCount > 0 && <span className="wishlist-badge">{wishlistCount}</span>}
+                        </Link>
 
                         {/* Strictly Role-based workspace link */}
                         {isLoggedIn && (

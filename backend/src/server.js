@@ -7,14 +7,13 @@ const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
 const db = require('./models/db');
-const app = express();
+const app = require('./app');
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'studio_secret_2024';
 
-app.use(cors());
-app.use(express.json());
+// No need for app.use(cors()) or express.json() here as app.js already has them
 
 // ==========================================
 // REAL-TIME NOTIFICATION ENGINE
@@ -128,6 +127,6 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`🚀 Fit & Flare Studio Backend Orchestrator running on port ${PORT}`);
+server.listen(PORT, '127.0.0.1', () => {
+    console.log(`🚀 Fit & Flare Studio Backend Orchestrator running on http://127.0.0.1:${PORT}`);
 });
