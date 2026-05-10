@@ -28,6 +28,8 @@ const TailorLogin = lazy(() => import('./pages/auth/tailor/TailorLogin'));
 const VendorLogin = lazy(() => import('./pages/auth/vendor/VendorLogin'));
 const VendorSignup = lazy(() => import('./pages/auth/vendor/VendorSignup'));
 const AdminLogin = lazy(() => import('./pages/auth/admin/AdminLogin'));
+const AdminSignup = lazy(() => import('./pages/auth/admin/AdminSignup'));
+const TailorSignup = lazy(() => import('./pages/auth/tailor/TailorSignup'));
 
 // Premium Loading Fallback
 const LoadingFallback = () => (
@@ -85,6 +87,7 @@ function App() {
 
                     {/* Tailor Auth */}
                     <Route path="/auth/tailor/login" element={<TailorLogin />} />
+                    <Route path="/auth/tailor/signup" element={<TailorSignup />} />
 
                     {/* Vendor Auth */}
                     <Route path="/auth/vendor/login" element={<VendorLogin />} />
@@ -92,6 +95,7 @@ function App() {
 
                     {/* Admin Auth */}
                     <Route path="/auth/admin/login" element={<AdminLogin />} />
+                    <Route path="/auth/admin/signup" element={<AdminSignup />} />
 
                     {/* Customer Flow */}
                     <Route path="/customizer" element={<Customizer />} />
@@ -103,6 +107,7 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/designs/:id" element={<DesignDetail />} />
                     <Route path="/order/:id" element={<OrderTracking />} />
+                    <Route path="/tracking" element={<OrderTracking />} />
                     <Route path="/order/success" element={<OrderSuccess />} />
 
                     {/* Role-Based Dashboards */}

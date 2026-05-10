@@ -6,6 +6,10 @@ import { designAPI } from '../services/api';
 import CONFIG from '../config';
 import '../styles/Customizer.css';
 
+import Viewer360 from '../features/customizer/Viewer360';
+import ConfigControls from '../features/customizer/ConfigControls';
+import CompareModal from '../features/customizer/CompareModal';
+
 const Customizer = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -95,12 +99,10 @@ const Customizer = () => {
         '#800080', '#FF8C00', '#98FF98', '#E6E6FA'
     ];
 
-    // Identify standard prefill
     let initialNeck = prefill.neck?.[0] || 'Deep U';
     let initialSleeve = prefill.sleeve?.[0] || 'Short Sleeves';
     let initialFabric = prefill.fabric?.[0] || 'Silk';
     
-    // Ensure fallbacks match the dictionary
     if(!OPTIONS["Neck Design"].find(o => o.label === initialNeck)) initialNeck = 'Deep U';
     if(!OPTIONS["Sleeve Style"].find(o => o.label === initialSleeve)) initialSleeve = 'Short Sleeves';
     if(!OPTIONS["Fabric Material"].find(o => o.label === initialFabric)) initialFabric = 'Silk';
@@ -120,15 +122,13 @@ const Customizer = () => {
 
     const updateConfig = (key, val) => setConfig(prev => ({ ...prev, [key]: val }));
 
-    // Price Calculation
-    const basePrice = 2500; // Foundational tailoring cost
+    const basePrice = 2500;
     const [totalPrice, setTotalPrice] = useState(basePrice);
 
     const [wishlistDesigns, setWishlistDesigns] = useState([]);
     const [similarDesigns, setSimilarDesigns] = useState([]);
 
     useEffect(() => {
-        // Price Calculation
         let calculated = basePrice;
         Object.keys(OPTIONS).forEach(category => {
             const selectedLabel = config[category];
@@ -139,7 +139,6 @@ const Customizer = () => {
     }, [config]);
 
     useEffect(() => {
-        // Fetch Wishlist
         const wishlistIds = JSON.parse(localStorage.getItem('wishlist') || '[]');
         if (wishlistIds.length > 0) {
             Promise.all(wishlistIds.map(id => designAPI.getDesignById(id)))
@@ -152,14 +151,12 @@ const Customizer = () => {
                 .catch(console.error);
         }
 
-        // Fetch Similar or Trending (Fallback)
         const fetchRecommendations = async () => {
             try {
                 let data;
                 if (prefill.id) {
                     data = await designAPI.getSimilarDesigns(prefill.id);
                 } else {
-                    // If customizing from scratch, show trending items as inspiration
                     const trending = await designAPI.getTrendingDesigns();
                     data = trending.designs || trending;
                 }
@@ -172,7 +169,7 @@ const Customizer = () => {
                 }
             } catch (err) {
                 console.error("Discovery error:", err);
-                setSimilarDesigns([]); // Prevent perpetual loading screen
+                setSimilarDesigns([]); 
             }
         };
 
@@ -185,210 +182,38 @@ const Customizer = () => {
         return `${CONFIG.API_URL.replace('/api', '')}${url}`;
     };
 
-
-    // Determine safe image to display
     let mainDisplayImage = prefill.image_url || prefill.image || '/classic_embroidery.png';
     if (mainDisplayImage.includes('unsplash') || mainDisplayImage.includes('photo')) {
-        mainDisplayImage = '/modern_blouse.png'; // No humans
+        mainDisplayImage = '/modern_blouse.png'; 
     }
 
-    // TRUE 360 ROTATION CAROUSEL (Multi-Angle Instead of 2D Flipping)
-    const [angleIndex, setAngleIndex] = useState(0);
-    const [zoom, setZoom] = useState(1);
-    const [isDragging, setIsDragging] = useState(false);
-    const [lastX, setLastX] = useState(0);
-
-    // Multi-angle references representing Front, Right, Back, Left structural views
-    // If we have custom uploaded angles, use them!
     const uploadedAngles = prefill.angles && Array.isArray(prefill.angles) ? prefill.angles : [];
-    
-    const angles = uploadedAngles.length > 0 
-        ? uploadedAngles.map(a => a.path)
-        : [
-            mainDisplayImage, 
-            '/classic_embroidery.png', 
-            '/bridal_hero.png', 
-            '/modern_blouse.png' 
-        ];
-
-    const angleLabels = uploadedAngles.length > 0 
-        ? uploadedAngles.map(a => a.tag)
-        : ["Front View", "Side View", "Back View", "Detail View"];
-
-    const handleMouseDown = (e) => {
-        setIsDragging(true);
-        setLastX(e.clientX);
-    };
-
-    const handleMouseMoveDrag = (e) => {
-        if (!isDragging) return;
-        const delta = e.clientX - lastX;
-        
-        // When drag threshold is met, spin the angle!
-        if (Math.abs(delta) > 40) {
-            if (delta > 0) {
-                setAngleIndex(prev => (prev + 1) % angles.length);
-            } else {
-                setAngleIndex(prev => (prev - 1 + angles.length) % angles.length);
-            }
-            setLastX(e.clientX); // Reset origin
-        }
-    };
-
-    const handleMouseUp = () => {
-        setIsDragging(false);
-    };
-
+    const angleLabels = ["Front View", "Side View", "Back View", "Detail View"];
 
     return (
         <div className="customizer-page">
             <Navbar />
             <div className="customizer-layout">
-                {/* 360 Multi-Angle Viewer Area */}
-                <div className="preview-container">
-                    <div className="preview-card">
-                        <div className="preview-label">Live True 360° Studio</div>
-                        
-                        <div 
-                            className="interactive-3d-viewer"
-                            onMouseDown={handleMouseDown}
-                            onMouseMove={handleMouseMoveDrag}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseUp}
-                            style={{ 
-                                cursor: isDragging ? 'grabbing' : 'grab',
-                                overflow: 'hidden',
-                                position: 'relative'
-                            }}
-                        >
-                            <div className="viewer-hint">↔ Drag to Spin 360° | {angleLabels[angleIndex]}</div>
-                            
-                            <img 
-                                key={angleIndex} // Forces re-render fade
-                                src={angles[angleIndex]}
-                                alt="Blouse Render Angle"
-                                className="customizer-target-img fade-in-angle"
-                                draggable="false"
-                                style={{
-                                    transform: `scale(${zoom})`,
-                                    transition: 'transform 0.1s ease-out'
-                                }}
-                            />
-                            
-                            {/* 360 Spin Indicators */}
-                            <div style={{ position: 'absolute', bottom: '15px', display: 'flex', gap: '8px' }}>
-                                {angles.map((_, i) => (
-                                    <div key={i} style={{
-                                        width: '8px', height: '8px', borderRadius: '50%',
-                                        background: i === angleIndex ? '#0A192F' : '#cbd5e1',
-                                        border: i === angleIndex ? '2px solid #C5A059' : 'none'
-                                    }}/>
-                                ))}
-                            </div>
-                        </div>
+                <Viewer360 
+                    mainDisplayImage={mainDisplayImage}
+                    uploadedAngles={uploadedAngles}
+                    angleLabels={angleLabels}
+                    basePrice={basePrice}
+                />
 
-                        <div className="zoom-controls">
-                            <span className="zoom-label">Zoom Level</span>
-                            <input 
-                                type="range" 
-                                className="zoom-slider"
-                                min="1" 
-                                max="3" 
-                                step="0.1" 
-                                value={zoom} 
-                                onChange={(e) => setZoom(e.target.value)} 
-                            />
-                        </div>
-
-                        <div className="preview-meta" style={{marginTop: '15px'}}>
-                            <span style={{color: '#C5A059', fontWeight: 800}}>Base Fitting: ₹{basePrice}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Interaction / Controls Area */}
-                <div className="controls-container">
-                    <div className="controls-card">
-                        <header className="controls-header">
-                            <h1>Bespoke Configuration</h1>
-                            <p>Designing: <strong>{prefill.title || prefill.name || 'Custom Atelier Blouse'}</strong></p>
-                            {prefill.description && (
-                                <p className="design-desc-mini">{prefill.description}</p>
-                            )}
-                        </header>
-
-                        <div className="tab-navigation" style={{ flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-start' }}>
-                            {[...Object.keys(OPTIONS), 'Color Palette'].map(tab => (
-                                <button
-                                    key={tab}
-                                    className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-                                    onClick={() => setActiveTab(tab)}
-                                    style={{ fontSize: '0.75rem', padding: '8px 16px' }}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="tab-content" style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }}>
-                            {activeTab === 'Color Palette' ? (
-                                <div className="option-group">
-                                    <label>SELECT PRIMARY COLOR</label>
-                                    <div className="option-grid">
-                                        {COLORS.map(c => (
-                                            <div
-                                                key={c}
-                                                className="option-pill"
-                                                onClick={() => updateConfig('Color', c)}
-                                                style={{ 
-                                                    background: c, 
-                                                    width: '50px', 
-                                                    height: '50px', 
-                                                    borderRadius: '2px', // Architecture style
-                                                    border: config['Color'] === c ? '3px solid #C5A059' : '1px solid #e2e8f0',
-                                                    boxShadow: config['Color'] === c ? '0 4px 10px rgba(197, 160, 89, 0.4)' : 'none',
-                                                    padding: 0
-                                                }}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="option-group">
-                                    <label>{activeTab.toUpperCase()}</label>
-                                    <div className="option-grid">
-                                        {OPTIONS[activeTab].map(opt => (
-                                            <div
-                                                key={opt.label}
-                                                className={`option-pill ${config[activeTab] === opt.label ? 'selected' : ''}`}
-                                                onClick={() => updateConfig(activeTab, opt.label)}
-                                                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', minWidth: '130px', textAlign: 'center', padding: '16px' }}
-                                            >
-                                                <span style={{fontWeight: 700}}>{opt.label}</span>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: config[activeTab] === opt.label ? '#ffffff' : '#94a3b8' }}>
-                                                    {opt.price === 0 ? 'Included' : `+ ₹${opt.price}`}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <footer className="controls-footer">
-                            <div className="price-estimation">
-                                <span className="label">Total Contract Price</span>
-                                <span className="price">₹{totalPrice}</span>
-                            </div>
-                            <button className="btn btn-primary btn-block" style={{borderRadius: '2px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '800', height: '54px'}} onClick={() => navigate('/measurements', { state: { config, totalPrice, baseDesign: prefill } })}>
-                                Confirm Design & Measure
-                            </button>
-                        </footer>
-                    </div>
-                </div>
+                <ConfigControls 
+                    prefill={prefill}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    config={config}
+                    updateConfig={updateConfig}
+                    totalPrice={totalPrice}
+                    navigate={navigate}
+                    OPTIONS={OPTIONS}
+                    COLORS={COLORS}
+                />
             </div>
 
-            {/* Wishlist Comparison Section */}
             {wishlistDesigns.length > 0 && (
                 <section className="comparison-section">
                     <div className="comparison-header">
@@ -415,52 +240,13 @@ const Customizer = () => {
                 </section>
             )}
 
-            {/* Comparison Modal */}
-            {compareTarget && (
-                <div className="compare-modal-overlay" onClick={() => setCompareTarget(null)}>
-                    <div className="compare-modal-content" onClick={e => e.stopPropagation()}>
-                        <header className="compare-modal-header">
-                            <h2>Expert Style Comparison</h2>
-                            <button className="close-modal" onClick={() => setCompareTarget(null)}>✕</button>
-                        </header>
-                        <div className="compare-table-container">
-                            <table className="compare-table">
-                                <thead>
-                                    <tr>
-                                        <th>Attribute</th>
-                                        <th>Current Customization</th>
-                                        <th>{compareTarget.title}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Neck Line</td>
-                                        <td>{config['Neck Design']}</td>
-                                        <td>{compareTarget.neck_type}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sleeve Style</td>
-                                        <td>{config['Sleeve Style']}</td>
-                                        <td>{compareTarget.sleeve_type}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Fabric</td>
-                                        <td>{config['Fabric Material']}</td>
-                                        <td>{compareTarget.fabric}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Estimate</td>
-                                        <td>₹{totalPrice}</td>
-                                        <td>₹{compareTarget.price}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <CompareModal 
+                compareTarget={compareTarget} 
+                setCompareTarget={setCompareTarget} 
+                config={config} 
+                totalPrice={totalPrice} 
+            />
 
-            {/* Similar Designs Section */}
             <section className="similar-designs-bottom">
                 <div className="comparison-header">
                     <h2>Inspired by your selection</h2>

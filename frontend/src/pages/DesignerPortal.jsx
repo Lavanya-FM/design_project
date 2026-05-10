@@ -4,23 +4,25 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
 import CONFIG from '../config';
+import DesignerStats from '../features/designer/DesignerStats';
+import DesignerUploadForm from '../features/designer/DesignerUploadForm';
+import DesignerPortfolio from '../features/designer/DesignerPortfolio';
 import '../styles/Operational.css';
 
 const DesignerPortal = () => {
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState('studio');
     const [uploadPreview, setUploadPreview] = useState(null);
-    const [base64Image, setBase64Image] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [myDesigns, setMyDesigns] = useState([]);
 
     const fetchMyDesigns = async () => {
         try {
             const res = await axios.get(`${CONFIG.API_URL}/designs`);
-            setMyDesigns(res.data);
+            setMyDesigns(Array.isArray(res.data) ? res.data : (res.data.designs || []));
         } catch (err) {
             console.error("Fetch Error:", err);
-            // Don't show toast on initial load if it's just a connection issue in mock mode
         }
     };
 
@@ -28,57 +30,55 @@ const DesignerPortal = () => {
         fetchMyDesigns();
     }, []);
 
-    const convertToBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (error) => reject(error);
-        });
-    };
-
-    const handleFileChange = async (e) => {
+    const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             setUploadPreview(URL.createObjectURL(file));
-            try {
-                const base64 = await convertToBase64(file);
-                setBase64Image(base64);
-            } catch (err) {
-                showToast("Error processing image", "error");
-            }
+            setSelectedFile(file);
         }
     };
 
     const handleUpload = async (e) => {
         e.preventDefault();
-        if (!base64Image) {
+        if (!selectedFile) {
             showToast("Please upload a design image", "error");
             return;
         }
         setLoading(true);
 
-        const formData = {
-            name: e.target['des-name'].value,
-            category: e.target['des-cat'].value,
-            price: e.target['des-price'].value,
-            description: e.target['des-desc'].value,
-            neck: [e.target['des-neck'].value],
-            sleeve: [e.target['des-sleeve'].value],
-            fabric: [e.target['des-fabric'].value],
-            work_type: e.target['des-work'].value,
-            tags: [e.target['des-cat'].value.toLowerCase(), e.target['des-work'].value.toLowerCase()],
-            props: e.target['des-props'].value.split(',').map(s => s.trim()),
-            image: base64Image,
-            status: 'Active'
-        };
-
         try {
+            // 1. Upload Image
+            const formDataImage = new FormData();
+            formDataImage.append('image', selectedFile);
+            formDataImage.append('folder', 'designs');
+            
+            const uploadRes = await axios.post(`${CONFIG.API_URL}/upload/single`, formDataImage, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            
+            const imageUrl = uploadRes.data.url;
+
+            // 2. Submit Design Details
+            const formData = {
+                name: e.target['des-name'].value,
+                category: e.target['des-cat'].value,
+                price: e.target['des-price'].value,
+                description: e.target['des-desc'].value,
+                neck: [e.target['des-neck'].value],
+                sleeve: [e.target['des-sleeve'].value],
+                fabric: [e.target['des-fabric'].value],
+                work_type: e.target['des-work'].value,
+                tags: [e.target['des-cat'].value.toLowerCase(), e.target['des-work'].value.toLowerCase()],
+                props: e.target['des-props'].value.split(',').map(s => s.trim()),
+                image: imageUrl,
+                status: 'Active'
+            };
+
             await axios.post(`${CONFIG.API_URL}/designs`, formData);
             showToast("Design Published Successfully!", "success");
             e.target.reset();
             setUploadPreview(null);
-            setBase64Image(null);
+            setSelectedFile(null);
             fetchMyDesigns();
             setActiveTab('portfolio');
         } catch (err) {
@@ -112,23 +112,7 @@ const DesignerPortal = () => {
             <main className="admin-content container">
                 {activeTab === 'studio' && (
                     <div className="animate-me">
-                        <section className="op-stats-grid">
-                            <div className="op-stat-card primary">
-                                <h4>Total Designs</h4>
-                                <div className="op-stat-val">{myDesigns.length || 0}</div>
-                                <p style={{ fontSize: '0.75rem', color: '#666' }}>Active in Gallery</p>
-                            </div>
-                            <div className="op-stat-card success">
-                                <h4>Order Hits</h4>
-                                <div className="op-stat-val">156</div>
-                                <p style={{ fontSize: '0.75rem', color: '#27AE60' }}>↑ 4 this week</p>
-                            </div>
-                            <div className="op-stat-card">
-                                <h4>Trending Style</h4>
-                                <div className="op-stat-val" style={{ fontSize: '1.2rem' }}>Royal Deep U</div>
-                                <p style={{ fontSize: '0.75rem', color: '#666' }}>Most saved by users</p>
-                            </div>
-                        </section>
+                        <DesignerStats designCount={myDesigns.length} />
 
                         <div className="dash-card" style={{ padding: '32px', textAlign: 'center' }}>
                             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✨</div>
@@ -144,115 +128,21 @@ const DesignerPortal = () => {
 
                 {activeTab === 'upload' && (
                     <div className="animate-me">
-                        <div className="dash-card" style={{ padding: '40px' }}>
-                            <form onSubmit={handleUpload}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                                    <div className="form-group">
-                                        <label className="form-label">Design Name</label>
-                                        <input type="text" name="des-name" className="form-input" placeholder="e.g. Royal Bridal V-Neck" required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Occasion Category</label>
-                                        <select name="des-cat" className="form-input">
-                                            <option>Bridal</option>
-                                            <option>Party</option>
-                                            <option>Workwear</option>
-                                            <option>Everyday</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label className="form-label">Primary Craft/Work</label>
-                                        <input type="text" name="des-work" className="form-input" placeholder="e.g. Hand Zardosi, Stone Work" required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Ideal Fabric</label>
-                                        <select name="des-fabric" className="form-input">
-                                            <option>Raw Silk</option>
-                                            <option>Velvet</option>
-                                            <option>Organza</option>
-                                            <option>Brocade</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Base Price (₹)</label>
-                                        <input type="number" name="des-price" className="form-input" placeholder="2500" required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Neck Styling</label>
-                                        <select name="des-neck" className="form-input">
-                                            <option>Deep U</option>
-                                            <option>V Neck</option>
-                                            <option>Sweetheart</option>
-                                            <option>Boat Neck</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="form-label">Sleeve Detail</label>
-                                        <select name="des-sleeve" className="form-input">
-                                            <option>Sleeveless</option>
-                                            <option>Short Sleeves</option>
-                                            <option>Elbow Length</option>
-                                            <option>Full Sleeves</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label className="form-label">Included Props (e.g. Latkans, Beads)</label>
-                                        <input type="text" name="des-props" className="form-input" placeholder="Comma separated list" />
-                                    </div>
-                                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label className="form-label">Design Inspiration & Details</label>
-                                        <textarea name="des-desc" className="form-input" rows="4"></textarea>
-                                    </div>
-                                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                                        <label className="form-label">High-Res Design Photo</label>
-                                        <div className="upload-zone" style={{ minHeight: '200px' }} onClick={() => document.getElementById('des-file').click()}>
-                                            <input type="file" id="des-file" hidden onChange={handleFileChange} accept="image/*" />
-                                            {uploadPreview ? (
-                                                <img src={uploadPreview} style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '12px' }} />
-                                            ) : (
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <div style={{ fontSize: '2.5rem' }}>📸</div>
-                                                    <p>Click to upload design image</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '30px', padding: '18px' }} disabled={loading}>
-                                    {loading ? 'Publishing Design...' : '✨ Publish to Global Gallery'}
-                                </button>
-                            </form>
-                        </div>
+                        <DesignerUploadForm 
+                            loading={loading}
+                            uploadPreview={uploadPreview}
+                            handleFileChange={handleFileChange}
+                            handleUpload={handleUpload}
+                        />
                     </div>
                 )}
 
                 {activeTab === 'portfolio' && (
-                    <div className="animate-me">
-                        <div className="op-stats-grid">
-                            {myDesigns.map(design => (
-                                <div key={design.id} className="dash-card" style={{ padding: 0, overflow: 'hidden' }}>
-                                    <div style={{ position: 'relative' }}>
-                                        <img src={getFullImageUrl(design.image_url)} style={{ width: '100%', height: '240px', objectFit: 'cover' }} alt={design.name} />
-                                        <span className="status-pill active" style={{ position: 'absolute', top: '10px', right: '10px' }}>Active</span>
-                                    </div>
-                                    <div style={{ padding: '16px' }}>
-                                        <h4 style={{ marginBottom: '8px' }}>{design.name}</h4>
-                                        <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '12px' }}>{design.category} • {design.work_type}</p>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>₹{design.price}</span>
-                                            <button className="btn-text btn-sm" style={{ padding: 0 }}>View Stats</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        {myDesigns.length === 0 && (
-                            <div style={{ textAlign: 'center', padding: '60px' }}>
-                                <p style={{ color: '#999' }}>No designs in your portfolio yet.</p>
-                                <button className="btn btn-outline" onClick={() => setActiveTab('upload')}>Upload Your First Design</button>
-                            </div>
-                        )}
-                    </div>
+                    <DesignerPortfolio 
+                        designs={myDesigns}
+                        getFullImageUrl={getFullImageUrl}
+                        setActiveTab={setActiveTab}
+                    />
                 )}
             </main>
             <Footer />

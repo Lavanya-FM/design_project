@@ -1,49 +1,126 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CONFIG from '../config';
 import NavbarComp from '../components/Navbar';
+import { useToast } from '../components/Toast';
 import '../styles/Checkout.css';
+
+const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
 
 const Payment = () => {
     const navigate = useNavigate();
-    const [selectedMethod, setSelectedMethod] = useState('');
+    const { showToast } = useToast();
+    const [selectedMethod, setSelectedMethod] = useState('razorpay');
     const [processing, setProcessing] = useState(false);
+    const [scriptLoaded, setScriptLoaded] = useState(false);
 
-    // Read dynamic total
     const savedData = JSON.parse(localStorage.getItem('currentOrder') || '{}');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const totalAmount = savedData.total || 0;
 
+    useEffect(() => {
+        loadRazorpayScript().then(res => setScriptLoaded(res));
+    }, []);
+
+    const processOrder = async (paymentResponse, backendOrderId) => {
+        try {
+            // 1. Verify Payment on Backend
+            const verifyRes = await axios.post(`${CONFIG.API_URL}/payments/verify`, {
+                razorpay_order_id: paymentResponse.razorpay_order_id,
+                razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                razorpay_signature: paymentResponse.razorpay_signature,
+                orderId: backendOrderId
+            });
+
+            if (verifyRes.data.status === 'success') {
+                showToast("Payment verified and order placed!", "success");
+                localStorage.removeItem('currentOrder');
+                navigate('/order/success');
+            } else {
+                throw new Error("Verification failed");
+            }
+        } catch (err) {
+            console.error("Order failed to finalize:", err);
+            showToast("Payment processed, but order verification failed.", "error");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
     const handlePayment = async () => {
         if (!selectedMethod) {
-            alert("Please select a payment method.");
+            showToast("Please select a payment method.", "error");
             return;
         }
 
         setProcessing(true);
+
         try {
-            // REAL TIME PERSISTENCE
-            const payload = {
-                userId: user.id || null, // Guest or User
+            // 0. Create Draft Order on Backend First to get a real ID
+            const orderPayload = {
+                userId: user.id || null,
                 items: [{
-                    designId: '8681284d-29e2-472e-8c34-eb17918d052d', // Fallback to first seeded design if no ID
+                    designId: savedData.designId,
                     customization: savedData.selections,
                     measurements: savedData.measurements,
                     price: totalAmount
                 }],
                 totalAmount: totalAmount
             };
+            const draftRes = await axios.post(`${CONFIG.API_URL}/orders`, orderPayload);
+            const backendOrderId = draftRes.data.id;
 
-            const response = await axios.post(`${CONFIG.API_URL}/orders`, payload);
-            console.log("Order saved to DB:", response.data);
+            if (selectedMethod === 'razorpay') {
+                if (!scriptLoaded) {
+                    showToast("Payment gateway failed to load.", "error");
+                    setProcessing(false);
+                    return;
+                }
 
-            localStorage.removeItem('currentOrder');
-            navigate('/order/success');
+                // 1. Create Razorpay Order on Backend
+                const rzpOrderRes = await axios.post(`${CONFIG.API_URL}/payments/create-order`, {
+                    amount: totalAmount,
+                    receipt: `receipt_${backendOrderId}`
+                });
+                const rzpOrder = rzpOrderRes.data;
+
+                const options = {
+                    key: "rzp_test_dummyKeyForFitAndFlare", 
+                    amount: rzpOrder.amount,
+                    currency: rzpOrder.currency,
+                    name: "Fit & Flare Studio",
+                    description: "Bespoke Tailoring Order",
+                    order_id: rzpOrder.id,
+                    handler: function (response) {
+                        processOrder(response, backendOrderId);
+                    },
+                    prefill: {
+                        name: user.full_name || "Guest Customer",
+                        email: user.email || "guest@example.com",
+                    },
+                    theme: { color: "#C5A059" }
+                };
+
+                const rzp = new window.Razorpay(options);
+                rzp.open();
+            } else {
+                // COD Flow
+                await axios.post(`${CONFIG.API_URL}/orders/place`, { orderId: backendOrderId, paymentId: `COD_${Date.now()}` });
+                localStorage.removeItem('currentOrder');
+                navigate('/order/success');
+            }
         } catch (err) {
-            console.error("Order failed to save:", err);
-            alert("Payment processed, but order saving failed. Please contact support.");
-        } finally {
+            console.error("Payment initiation failed:", err);
+            showToast("Failed to initiate payment. Please try again.", "error");
             setProcessing(false);
         }
     };
@@ -65,39 +142,15 @@ const Payment = () => {
 
                                 <div className="payment-options">
                                     <div
-                                        className={`payment-method ${selectedMethod === 'upi' ? 'selected' : ''}`}
-                                        onClick={() => setSelectedMethod('upi')}
-                                    >
-                                        <span className="payment-icon">📱</span>
-                                        <div>
-                                            <b>UPI / GPay / PhonePe</b>
-                                            <p className="method-desc">Instant payment using UPI ID or QR Code</p>
-                                        </div>
-                                        <input type="radio" checked={selectedMethod === 'upi'} readOnly />
-                                    </div>
-
-                                    <div
-                                        className={`payment-method ${selectedMethod === 'card' ? 'selected' : ''}`}
-                                        onClick={() => setSelectedMethod('card')}
+                                        className={`payment-method ${selectedMethod === 'razorpay' ? 'selected' : ''}`}
+                                        onClick={() => setSelectedMethod('razorpay')}
                                     >
                                         <span className="payment-icon">💳</span>
                                         <div>
-                                            <b>Credit / Debit Card</b>
-                                            <p className="method-desc">Visa, Mastercard, RuPay</p>
+                                            <b>Razorpay (Cards / UPI / NetBanking)</b>
+                                            <p className="method-desc">Pay securely via Razorpay payment gateway</p>
                                         </div>
-                                        <input type="radio" checked={selectedMethod === 'card'} readOnly />
-                                    </div>
-
-                                    <div
-                                        className={`payment-method ${selectedMethod === 'netbanking' ? 'selected' : ''}`}
-                                        onClick={() => setSelectedMethod('netbanking')}
-                                    >
-                                        <span className="payment-icon">🏦</span>
-                                        <div>
-                                            <b>Net Banking</b>
-                                            <p className="method-desc">All major Indian banks supported</p>
-                                        </div>
-                                        <input type="radio" checked={selectedMethod === 'netbanking'} readOnly />
+                                        <input type="radio" checked={selectedMethod === 'razorpay'} readOnly />
                                     </div>
 
                                     <div

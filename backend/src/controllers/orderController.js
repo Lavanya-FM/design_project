@@ -3,13 +3,54 @@ const pool = require('../config/db');
 exports.getAllOrders = async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT o.*, u.full_name as customer_name, t.full_name as tailor_name 
+            SELECT o.*, u.name as customer_name, t.name as tailor_name 
             FROM orders o 
             LEFT JOIN users u ON o.user_id = u.id 
             LEFT JOIN users t ON o.tailor_id = t.id
             ORDER BY o.created_at DESC
         `);
         res.json(result.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+exports.getOrderById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const orderResult = await pool.query(`
+            SELECT o.*, u.name as customer_name, t.name as tailor_name 
+            FROM orders o 
+            LEFT JOIN users u ON o.user_id = u.id 
+            LEFT JOIN users t ON o.tailor_id = t.id
+            WHERE o.id = $1
+        `, [id]);
+
+        if (orderResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        const itemsResult = await pool.query(`
+            SELECT oi.*, d.name as design_name, d.image_url as design_image
+            FROM order_items oi
+            JOIN designs d ON oi.base_design_id = d.id
+            WHERE oi.order_id = $1
+        `, [id]);
+
+        const historyResult = await pool.query(`
+            SELECT h.*, u.name as changed_by_name
+            FROM order_status_history h
+            LEFT JOIN users u ON h.changed_by = u.id
+            WHERE h.order_id = $1
+            ORDER BY h.created_at DESC
+        `, [id]);
+
+        res.json({
+            ...orderResult.rows[0],
+            items: itemsResult.rows,
+            history: historyResult.rows
+        });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

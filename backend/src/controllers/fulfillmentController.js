@@ -61,6 +61,7 @@ exports.updateOrderStatus = async (req, res) => {
     const user_id = req.user.id;
 
     const VALID_FLOW = {
+        'placed': ['accepted'],
         'accepted': ['stitching', 'in_production'],
         'stitching': ['ready', 'quality_check'],
         'in_production': ['quality_check'],
@@ -70,30 +71,57 @@ exports.updateOrderStatus = async (req, res) => {
         'dispatched': ['delivered']
     };
 
+    const STITCHING_STAGES = ['Cutting', 'Stitching', 'Embroidery', 'Finishing', 'Ready'];
+
     try {
-        const current = await pool.query('SELECT status FROM orders WHERE id = $1', [id]);
+        const current = await pool.query('SELECT status, stitching_stage FROM orders WHERE id = $1', [id]);
         if (current.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
 
         const oldStatus = current.rows[0].status;
+        const { status: newStatus, stitching_stage: newStage, comments, tracking_id } = req.body;
         
-        // Simple validation or just update
+        // Simple update logic
         const query = `
             UPDATE orders 
-            SET status = $1, tracking_id = COALESCE($2, tracking_id), updated_at = NOW() 
-            WHERE id = $3 
+            SET status = COALESCE($1, status), 
+                stitching_stage = COALESCE($2, stitching_stage),
+                tracking_id = COALESCE($3, tracking_id), 
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $4 
             RETURNING *
         `;
-        const result = await pool.query(query, [status, tracking_id, id]);
+        const result = await pool.query(query, [newStatus, newStage, tracking_id, id]);
 
         // Log history
         await pool.query(
             'INSERT INTO order_status_history (order_id, old_status, new_status, changed_by, comments) VALUES ($1, $2, $3, $4, $5)',
-            [id, oldStatus, status, user_id, comments]
+            [id, oldStatus, newStatus || oldStatus, user_id, comments || (newStage ? `Stage: ${newStage}` : '')]
         );
+
+        // --- SOCKET EMIT ---
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`order_${id}`).emit('status_update', {
+                orderId: id,
+                status: newStatus || oldStatus,
+                stitching_stage: newStage || current.rows[0].stitching_stage
+            });
+        }
 
         res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ error: 'Update failed' });
+    }
+};
+
+exports.toggleAvailability = async (req, res) => {
+    const userId = req.user.id;
+    const { isAvailable } = req.body;
+    try {
+        await pool.query("UPDATE users SET is_available = $1 WHERE id = $2", [isAvailable, userId]);
+        res.json({ success: true, is_available: isAvailable });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to toggle availability' });
     }
 };
 
@@ -110,6 +138,13 @@ exports.sendMessage = async (req, res) => {
             'INSERT INTO order_messages (order_id, sender_id, message_text, attachment_url) VALUES ($1, $2, $3, $4) RETURNING *',
             [id, sender_id, text, attachment]
         );
+
+        // --- SOCKET EMIT ---
+        const io = req.app.get('io');
+        if (io) {
+            io.to(`order_${id}`).emit('new_message', result.rows[0]);
+        }
+
         res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ error: 'Message failed' });

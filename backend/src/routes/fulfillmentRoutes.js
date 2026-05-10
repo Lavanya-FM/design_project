@@ -9,9 +9,13 @@ router.get('/designer/orders', verifyToken, isDesigner, fulfillmentController.ge
 // Admin view
 router.get('/admin/stats', verifyToken, isAdmin, fulfillmentController.getAdminStats);
 
+const { validate } = require('../middleware/validate');
+const { tailorUpdateSchema } = require('../validators/schemas');
+
 // Order specific actions
 router.post('/:id/accept', verifyToken, isDesigner || isTailor, fulfillmentController.acceptOrder);
-router.patch('/:id/status', verifyToken, fulfillmentController.updateOrderStatus);
+router.patch('/:id/status', verifyToken, validate(tailorUpdateSchema), fulfillmentController.updateOrderStatus);
+router.post('/availability', verifyToken, isTailor, fulfillmentController.toggleAvailability);
 router.post('/:id/messages', verifyToken, fulfillmentController.sendMessage);
 router.get('/:id/messages', verifyToken, fulfillmentController.getMessages);
 router.post('/:id/rate', verifyToken, fulfillmentController.rateOrder);

@@ -11,7 +11,13 @@ const app = require('./app');
 const server = http.createServer(app);
 const io = socketIo(server, { cors: { origin: "*" } });
 
+// Attach io to app for access in routes/controllers
+app.set('io', io);
+
 const JWT_SECRET = process.env.JWT_SECRET || 'studio_secret_2024';
+
+const { validate } = require('./middleware/validate');
+const { loginSchema, submitOrderSchema } = require('./validators/schemas');
 
 // No need for app.use(cors()) or express.json() here as app.js already has them
 
@@ -75,11 +81,11 @@ const handleRoleLogin = (role) => (req, res) => {
     });
 };
 
-app.post('/api/auth/customer/login', handleRoleLogin('CUSTOMER'));
-app.post('/api/auth/designer/login', handleRoleLogin('DESIGNER'));
-app.post('/api/auth/tailor/login', handleRoleLogin('TAILOR'));
-app.post('/api/auth/vendor/login', handleRoleLogin('VENDOR'));
-app.post('/api/auth/admin/login', handleRoleLogin('ADMIN'));
+app.post('/api/auth/customer/login', validate(loginSchema), handleRoleLogin('CUSTOMER'));
+app.post('/api/auth/designer/login', validate(loginSchema), handleRoleLogin('DESIGNER'));
+app.post('/api/auth/tailor/login', validate(loginSchema), handleRoleLogin('TAILOR'));
+app.post('/api/auth/vendor/login', validate(loginSchema), handleRoleLogin('VENDOR'));
+app.post('/api/auth/admin/login', validate(loginSchema), handleRoleLogin('ADMIN'));
 
 // ==========================================
 // CUSTOMER ACTIONS & NOTIFICATIONS
@@ -97,7 +103,7 @@ app.post('/api/actions/select-fabric', (req, res) => {
     res.json({ success: true });
 });
 
-app.post('/api/actions/submit-order', (req, res) => {
+app.post('/api/actions/submit-order', validate(submitOrderSchema), (req, res) => {
     const { orderDetails, customerName } = req.body;
     const orderId = 'ORD-' + Math.floor(Math.random() * 10000);
 
@@ -119,6 +125,11 @@ io.on('connection', (socket) => {
     socket.on('join_role', (role) => {
         socket.join(`role_${role.toLowerCase()}`);
         console.log(`Socket ${socket.id} joined ${role} room`);
+    });
+
+    socket.on('join_order', (orderId) => {
+        socket.join(`order_${orderId}`);
+        console.log(`Socket ${socket.id} joined tracking for order ${orderId}`);
     });
 
     socket.on('disconnect', () => {

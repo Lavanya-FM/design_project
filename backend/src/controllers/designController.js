@@ -10,23 +10,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-// Helper: Save Base64 or Binary Image
-const saveBase64Image = (base64String) => {
-    if (!base64String || !base64String.includes('base64,')) return base64String;
-    
-    try {
-        const base64Data = base64String.replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Data, 'base64');
-        const filename = `${uuidv4()}.jpg`;
-        const filepath = path.join(UPLOADS_DIR, filename);
-        
-        fs.writeFileSync(filepath, buffer);
-        return `/static/images/designs/${filename}`;
-    } catch (err) {
-        console.error("Error saving image:", err);
-        return base64String;
-    }
-};
+// Removed saveBase64Image helper as images are uploaded via /api/upload
 
 /**
  * GET /designs
@@ -72,9 +56,13 @@ exports.getAllDesigns = async (req, res) => {
 
     // Sorting
     if (sort === 'trending') {
-        query += ` ORDER BY views_count DESC, created_at DESC`;
+        query += ` ORDER BY trending_score DESC, views_count DESC`;
     } else if (sort === 'popular') {
         query += ` ORDER BY wishlist_count DESC, created_at DESC`;
+    } else if (sort === 'price-low') {
+        query += ` ORDER BY price ASC`;
+    } else if (sort === 'price-high') {
+        query += ` ORDER BY price DESC`;
     } else {
         query += ` ORDER BY created_at DESC`;
     }
@@ -87,16 +75,29 @@ exports.getAllDesigns = async (req, res) => {
 
     // Apply pagination to the main query
     query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    
+    // Convert SELECT * to fetch normalized image
+    query = query.replace('SELECT * FROM designs', `SELECT designs.*, 
+        (SELECT url FROM design_images WHERE design_id = designs.id ORDER BY display_order LIMIT 1) as normalized_image 
+        FROM designs`);
+        
     params.push(limit, offset);
 
     try {
         const result = await pool.query(query, params);
+        
+        // Map normalized image
+        const mappedDesigns = result.rows.map(d => ({
+            ...d,
+            image: d.normalized_image || d.images || d.image_url || ''
+        }));
+
         res.json({
             total: totalCount,
             count: result.rows.length,
             page: parseInt(page),
             limit: parseInt(limit),
-            designs: result.rows
+            designs: mappedDesigns
         });
     } catch (err) {
         console.error("Database Error (Fetching Designs):", err.message);
@@ -110,9 +111,18 @@ exports.getAllDesigns = async (req, res) => {
  */
 exports.getTrendingDesigns = async (req, res) => {
     try {
-        const query = 'SELECT * FROM designs ORDER BY views_count DESC, created_at DESC LIMIT 6';
+        const query = `
+            SELECT d.*, 
+            (SELECT url FROM design_images WHERE design_id = d.id ORDER BY display_order LIMIT 1) as normalized_image
+            FROM designs d 
+            ORDER BY views_count DESC, created_at DESC LIMIT 6
+        `;
         const result = await pool.query(query);
-        res.json(result.rows);
+        const mappedDesigns = result.rows.map(d => ({
+            ...d,
+            image: d.normalized_image || d.images || d.image_url || ''
+        }));
+        res.json(mappedDesigns);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch trending designs' });
     }
@@ -125,8 +135,8 @@ exports.getTrendingDesigns = async (req, res) => {
 exports.getDesignById = async (req, res) => {
     const { id } = req.params;
     try {
-        // Increment view count
-        await pool.query('UPDATE designs SET views_count = views_count + 1 WHERE id = $1', [id]);
+        // Increment view count and trending score
+        await pool.query('UPDATE designs SET views_count = views_count + 1, trending_score = trending_score + 0.1 WHERE id = $1', [id]);
         
         // Track activity (anonymous if no user_id)
         const user_id = req.user ? req.user.id : null;
@@ -138,7 +148,20 @@ exports.getDesignById = async (req, res) => {
         const result = await pool.query('SELECT * FROM designs WHERE id = $1', [id]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
         
-        res.json(result.rows[0]);
+        const design = result.rows[0];
+
+        // Fetch normalized data
+        const imagesRes = await pool.query('SELECT url, tag FROM design_images WHERE design_id = $1 ORDER BY display_order', [id]);
+        design.image_gallery = imagesRes.rows;
+        design.image = imagesRes.rows[0]?.url || design.images || '';
+
+        const tagsRes = await pool.query('SELECT tag_name FROM design_tags WHERE design_id = $1', [id]);
+        design.tags = tagsRes.rows.map(r => r.tag_name);
+
+        const customRes = await pool.query('SELECT customization_type, customization_value FROM design_customizations WHERE design_id = $1', [id]);
+        design.customizations = customRes.rows;
+
+        res.json(design);
     } catch (err) {
         res.status(500).json({ error: 'Server error' });
     }
@@ -194,7 +217,9 @@ exports.searchDesigns = async (req, res) => {
 
     const searchTerms = `%${q}%`;
     const query = `
-        SELECT * FROM designs 
+        SELECT d.*, 
+        (SELECT url FROM design_images WHERE design_id = d.id ORDER BY display_order LIMIT 1) as normalized_image
+        FROM designs d
         WHERE title ILIKE $1 
         OR description ILIKE $1 
         OR neck_type ILIKE $1 
@@ -204,7 +229,11 @@ exports.searchDesigns = async (req, res) => {
 
     try {
         const result = await pool.query(query, [searchTerms]);
-        res.json(result.rows);
+        const mappedDesigns = result.rows.map(d => ({
+            ...d,
+            image: d.normalized_image || d.images || d.image_url || ''
+        }));
+        res.json(mappedDesigns);
     } catch (err) {
         console.error("Search Error:", err);
         res.status(500).json({ error: 'Search failed' });
@@ -216,29 +245,81 @@ exports.searchDesigns = async (req, res) => {
  * Admin upload
  */
 exports.createDesign = async (req, res) => {
-    const { 
-        title, description, price, neck_type, sleeve_type, 
-        back_type, work_type, fabric, occasion, images, is_customizable 
-    } = req.body;
-    
-    // images is expected to be an array of base64 or URLs
-    const processedImages = Array.isArray(images) 
-        ? images.map(img => saveBase64Image(img)) 
-        : [saveBase64Image(images)];
+    const title = req.body.title || req.body.name;
+    const description = req.body.description || '';
+    const price = req.body.price;
+    const neck_type = req.body.neck_type || (Array.isArray(req.body.neck) ? req.body.neck[0] : req.body.neck) || '';
+    const sleeve_type = req.body.sleeve_type || (Array.isArray(req.body.sleeve) ? req.body.sleeve[0] : req.body.sleeve) || '';
+    const back_type = req.body.back_type || '';
+    const work_type = req.body.work_type || '';
+    const fabric = req.body.fabric || (Array.isArray(req.body.fabric) ? req.body.fabric[0] : req.body.fabric) || '';
+    const occasion = req.body.occasion || req.body.category || '';
+    const is_customizable = req.body.is_customizable !== undefined ? req.body.is_customizable : true;
+
+    const id = uuidv4();
     
     try {
-        const result = await pool.query(
+        // 1. Insert into designs
+        await pool.query(
             `INSERT INTO designs (
-                title, description, price, neck_type, sleeve_type, 
-                back_type, work_type, fabric, occasion, images, is_customizable
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-            [
-                title, description, price, neck_type, sleeve_type, 
-                back_type, work_type, fabric, occasion, JSON.stringify(processedImages), 
-                is_customizable !== undefined ? is_customizable : true
-            ]
+                id, title, description, price, neck_type, sleeve_type, 
+                back_type, work_type, fabric, occasion, is_customizable
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+            [id, title, description, price, neck_type, sleeve_type, back_type, work_type, fabric, occasion, is_customizable]
         );
-        res.status(201).json(result.rows[0]);
+
+        // 2. Insert into design_images
+        let imageList = [];
+        if (req.body.tags) {
+            const imgTag = req.body.tags.find(t => typeof t === 'string' && t.startsWith('[') && t.includes('url'));
+            if (imgTag) {
+                try { imageList = JSON.parse(imgTag); } catch(e){}
+            }
+        }
+        
+        if (imageList.length === 0) {
+             const singleImage = req.body.image || req.body.images;
+             if (singleImage) {
+                 if (Array.isArray(singleImage)) {
+                     imageList = singleImage.map(url => ({ url, tag: 'Front View' }));
+                 } else {
+                     imageList = [{ url: singleImage, tag: 'Front View' }];
+                 }
+             }
+        }
+
+        for (let i = 0; i < imageList.length; i++) {
+            await pool.query(
+                `INSERT INTO design_images (id, design_id, url, tag, display_order) VALUES ($1, $2, $3, $4, $5)`,
+                [uuidv4(), id, imageList[i].url || imageList[i], imageList[i].tag || 'Front View', i]
+            );
+        }
+
+        // 3. Insert into design_tags
+        const tags = Array.isArray(req.body.tags) ? req.body.tags.filter(t => typeof t === 'string' && !t.startsWith('[')) : [];
+        for (const tag of tags) {
+            await pool.query(
+                `INSERT INTO design_tags (id, design_id, tag_name) VALUES ($1, $2, $3)`,
+                [uuidv4(), id, tag]
+            );
+        }
+
+        // 4. Insert into design_customizations
+        const customizations = [
+            { type: 'neck', value: neck_type },
+            { type: 'sleeve', value: sleeve_type },
+            { type: 'fabric', value: fabric }
+        ];
+        for (const c of customizations) {
+             if (c.value) {
+                 await pool.query(
+                    `INSERT INTO design_customizations (id, design_id, customization_type, customization_value) VALUES ($1, $2, $3, $4)`,
+                    [uuidv4(), id, c.type, c.value]
+                 );
+             }
+        }
+
+        res.status(201).json({ id, title, price, image: imageList[0]?.url, category: occasion });
     } catch (err) {
         console.error("Error creating design:", err);
         res.status(500).json({ error: 'Creation failed' });
@@ -270,5 +351,42 @@ exports.estimatePrice = async (req, res) => {
         res.json({ estimate: total, base });
     } catch (err) {
         res.status(500).json({ error: 'Estimation failed' });
+    }
+};
+/**
+ * POST /designs/:id/review
+ */
+exports.addReview = async (req, res) => {
+    const { id } = req.params;
+    const { rating, comment, target_type } = req.body;
+    const user_id = req.user.id;
+
+    try {
+        const reviewId = uuidv4();
+        await pool.query(
+            'INSERT INTO reviews (id, user_id, target_id, target_type, rating, comment) VALUES ($1, $2, $3, $4, $5, $6)',
+            [reviewId, user_id, id, target_type, rating, comment]
+        );
+        res.status(201).json({ success: true, id: reviewId });
+    } catch (err) {
+        res.status(500).json({ error: 'Review submission failed' });
+    }
+};
+
+/**
+ * PATCH /designs/:id/moderate (Admin Only)
+ */
+exports.moderateDesign = async (req, res) => {
+    const { id } = req.params;
+    const { status, moderation_note } = req.body;
+
+    try {
+        await pool.query(
+            'UPDATE designs SET status = $1, moderation_note = $2 WHERE id = $3',
+            [status, moderation_note, id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Moderation failed' });
     }
 };

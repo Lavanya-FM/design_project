@@ -71,7 +71,11 @@ const MeasurementCapture = () => {
                                     <p>Our algorithms are verifying your measurements against your body profile.</p>
                                 </div>
                             </div>
-                            <button className="btn btn-primary btn-block" onClick={() => navigate('/checkout/review', { state: { config, measurements, totalPrice } })}>
+                            <button className="btn btn-primary btn-block" onClick={() => {
+                                const orderData = { selections: config, measurements, total: totalPrice, designId: location.state?.baseDesign?.id };
+                                localStorage.setItem('currentOrder', JSON.stringify(orderData));
+                                navigate('/checkout/review', { state: orderData });
+                            }}>
                                 Confirm & Review Order
                             </button>
                             <button className="btn btn-text" onClick={() => setStep(1)}>Go Back</button>

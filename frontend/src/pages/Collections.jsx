@@ -4,6 +4,8 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import CONFIG from '../config';
+import DesignCard from '../features/shared/DesignCard';
+import Lightbox from '../features/shared/Lightbox';
 import '../styles/Collections.css';
 import { BLOUSE_DESIGNS } from '../data/designs';
 
@@ -19,127 +21,12 @@ const FILTER_CATEGORIES = {
 };
 
 const SORT_OPTIONS = [
+    { label: 'Trending', value: 'trending' },
     { label: 'Popular Designs', value: 'popular' },
     { label: 'New Arrivals', value: 'newest' },
     { label: 'Price: Low → High', value: 'price_asc' },
     { label: 'Price: High → Low', value: 'price_desc' },
 ];
-
-const DesignCard = ({ design, navigate, onFullscreen }) => {
-    const [zoom, setZoom] = useState(false);
-    const [pos, setPos] = useState({ x: 0, y: 0 });
-
-    const handleMouseMove = (e) => {
-        const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-        const x = ((e.pageX - left - window.pageXOffset) / width) * 100;
-        const y = ((e.pageY - top - window.pageYOffset) / height) * 100;
-        setPos({ x, y });
-    };
-
-    return (
-        <div
-            className="design-card-premium"
-            onMouseEnter={() => setZoom(true)}
-            onMouseLeave={() => setZoom(false)}
-            onMouseMove={handleMouseMove}
-        >
-            <div className="card-image-container" onClick={() => onFullscreen(design)}>
-                <img
-                    src={design.image_url || design.image}
-                    alt={design.name}
-                    loading="lazy"
-                    onError={(e) => { e.target.src = '/classic_embroidery.png'; }}
-                />
-
-                {zoom && (
-                    <div
-                        className="magnifier-loupe"
-                        style={{
-                            backgroundImage: `url(${design.image_url || design.image})`,
-                            backgroundPosition: `${pos.x}% ${pos.y}%`,
-                            left: `${pos.x}%`,
-                            top: `${pos.y}%`
-                        }}
-                    />
-                )}
-
-                <div className="card-overlay" onClick={(e) => e.stopPropagation()}>
-                    <button className="btn-customize-cta" onClick={() => navigate('/customizer', { state: { prefill: design } })}>
-                        Select & Customize
-                    </button>
-                    <div className="fullscreen-hint">Click for Fullscreen</div>
-                </div>
-            </div>
-            <div className="card-content">
-                <div className="card-meta">
-                    <span className="card-cat">{design.category || 'Bridal'}</span>
-                    <span className="card-time">🚚 {design.delivery_days || 15} days</span>
-                </div>
-                <h3 className="card-title" onClick={() => navigate(`/designs/${design.id}`)} style={{ cursor: 'pointer' }}>
-                    {design.title || design.name}
-                </h3>
-                <p className="card-description-mini" style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 10px 0', lineClamp: '2', display: '-webkit-box', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {design.description || 'Exclusive handcrafted design from our atelier.'}
-                </p>
-                {design.work_type && (
-                    <div className="card-work-badge" style={{ fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '8px', color: '#c5a059' }}>
-                        ✨ {design.work_type}
-                    </div>
-                )}
-                <div className="card-tags">
-                    {design.neck?.[0] && <span className="tag-pill">{design.neck[0]}</span>}
-                    {design.sleeve?.[0] && <span className="tag-pill">{design.sleeve[0]}</span>}
-                    {design.color?.[0] && <span className="tag-pill">{design.color[0]}</span>}
-                </div>
-                <div className="card-footer">
-                    <div className="card-price">
-                        <span className="price-label">Starting at</span>
-                        <span className="price-val">₹{design.base_price || design.price || 12000}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const Lightbox = ({ design, allDesigns, onSelect, onClose }) => {
-    const similarDesigns = allDesigns
-        .filter(d => d.id !== design.id && (d.category === design.category || d.work_type === design.work_type))
-        .slice(0, 4);
-    const [isFav, setIsFav] = useState(false);
-
-    return (
-        <div className="lightbox-overlay" onClick={onClose}>
-            <div className="lightbox-content animate-pop" onClick={e => e.stopPropagation()}>
-                <button className="lightbox-close" onClick={onClose}>×</button>
-                <button className={`lightbox-fav ${isFav ? 'active' : ''}`} onClick={() => setIsFav(!isFav)}>♥</button>
-                <img src={design.image_url || design.image} alt={design.name} className="lightbox-main-img" onError={(e) => { e.target.src = '/classic_embroidery.png'; }} />
-
-                <div className="lightbox-details">
-                    <h3 style={{ marginBottom: '8px' }}>{design.title || design.name}</h3>
-                    <p style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 'bold' }}>{design.work_type || 'Custom Work'} | {design.fabric || 'Silk'}</p>
-                    <p className="lightbox-desc" style={{ marginTop: '15px', color: '#475569', lineHeight: '1.6', fontSize: '0.95rem' }}>
-                        {design.description || 'Exclusive handcrafted design from our atelier.'}
-                    </p>
-                </div>
-
-                {similarDesigns.length > 0 && (
-                    <div className="lightbox-recommendations">
-                        <h4>You May Also Like</h4>
-                        <div className="rec-grid">
-                            {similarDesigns.map(s => (
-                                <div key={s.id} className="rec-item" onClick={() => onSelect(s)}>
-                                    <img src={s.image_url || s.image} alt={s.name} onError={(e) => { e.target.src = '/classic_embroidery.png'; }} />
-                                    <span>{s.name}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
 
 const Collections = () => {
     const location = useLocation();
@@ -194,60 +81,37 @@ const Collections = () => {
                             ...d,
                             image_url: safeImage,
                             angles: safeAngles,
-                            tags: Array.isArray(d.tags) ? d.tags : (d.tags ? JSON.parse(d.tags) : []),
                             neck: Array.isArray(d.neck) ? d.neck : (d.neck ? JSON.parse(d.neck) : []),
-                            sleeve: Array.isArray(d.sleeve) ? d.sleeve : (d.sleeve ? JSON.parse(d.sleeve) : []),
-                            fabric: Array.isArray(d.fabric) ? d.fabric : (d.fabric ? JSON.parse(d.fabric) : []),
-                            color: Array.isArray(d.color) ? d.color : (d.color ? JSON.parse(d.color) : []),
-                            back_design: Array.isArray(d.back_design) ? d.back_design : (d.back_design ? JSON.parse(d.back_design) : []),
+                            tags: Array.isArray(d.tags) ? d.tags : (d.tags ? (d.tags.startsWith('[') ? JSON.parse(d.tags) : d.tags.split(',')) : []),
                         };
                     });
-                    const merged = [...BLOUSE_DESIGNS, ...apiData.filter(ad => !BLOUSE_DESIGNS.find(md => md.id === ad.id))];
-                    setAllDesigns(merged);
+                    setAllDesigns(apiData);
                 }
             } catch (err) {
                 console.error("API sync failed", err);
             }
         };
         fetchDesigns();
-    }, []);
+    }, [sortBy, searchQuery]);
 
     useEffect(() => {
-        let results = [...allDesigns];
-        if (searchQuery) {
-            const lowQuery = searchQuery.toLowerCase();
-            results = results.filter(d =>
-                d.name?.toLowerCase().includes(lowQuery) ||
-                d.tags?.some(t => t.toLowerCase().includes(lowQuery)) ||
-                d.category?.toLowerCase().includes(lowQuery) ||
-                d.work_type?.toLowerCase().includes(lowQuery)
-            );
-        }
+        let results = Array.isArray(allDesigns) ? [...allDesigns] : [];
         
+        // Safety check to prevent crash if allDesigns is not yet loaded or empty
+        if (results.length === 0 && !searchQuery) return;
         Object.keys(activeFilters).forEach(key => {
             const selectedVals = activeFilters[key];
             if (selectedVals.length > 0) {
-                if (key === 'Occasion') {
-                    results = results.filter(d => selectedVals.includes(d.category));
-                } else if (key === 'Work') {
-                    results = results.filter(d => selectedVals.includes(d.work_type));
-                } else {
-                    const mapping = {
-                        Neckline: 'neck', Sleeve: 'sleeve', Fabric: 'fabric', Color: 'color', Back_Design: 'back_design'
-                    };
-                    const propKey = mapping[key] || key.toLowerCase();
-                    results = results.filter(d => selectedVals.some(v => (d[propKey] || []).includes(v)));
-                }
+                const mapping = {
+                    Neckline: 'neck_type', Sleeve: 'sleeve_type', Fabric: 'fabric', Color: 'color', Work: 'work_type', Occasion: 'occasion'
+                };
+                const propKey = mapping[key] || key.toLowerCase();
+                results = results.filter(d => selectedVals.some(v => d[propKey] === v));
             }
         });
-
-        if (sortBy === 'price_asc') results.sort((a, b) => (a.base_price || a.price || 0) - (b.base_price || b.price || 0));
-        if (sortBy === 'price_desc') results.sort((a, b) => (b.base_price || b.price || 0) - (a.base_price || a.price || 0));
-        if (sortBy === 'popular') results.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-        if (sortBy === 'newest') results.reverse();
         
         setFilteredDesigns(results);
-    }, [searchQuery, activeFilters, sortBy, allDesigns]);
+    }, [activeFilters, allDesigns]);
 
     const toggleFilter = (category, value) => {
         setActiveFilters(prev => {

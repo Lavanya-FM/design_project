@@ -46,6 +46,10 @@ const VendorSignup = () => {
                                 <label className="form-label">Warehouse Address</label>
                                 <textarea className="form-input" rows="3" required></textarea>
                             </div>
+                            <div className="form-group" style={{ marginTop: '20px' }}>
+                                <label className="form-label">Set Account Password</label>
+                                <input type="password" classname="form-input" placeholder="••••••••" required />
+                            </div>
 
                             <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '30px', background: '#e17055', borderColor: '#e17055' }}>
                                 Apply for Partnership

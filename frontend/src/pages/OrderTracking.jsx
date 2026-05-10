@@ -1,48 +1,127 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import io from 'socket.io-client';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import CONFIG from '../config';
 import '../styles/OrderTracking.css';
 
 const OrderTracking = () => {
+    const { id } = useParams();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [order, setOrder] = useState(null);
     const [showAlterationModal, setShowAlterationModal] = useState(false);
     const [alterationNote, setAlterationNote] = useState('');
     const [alterationType, setAlterationType] = useState('fit');
 
-    const order = {
-        id: 'FF-2401',
-        total: 3200,
-        designName: 'Royal Zardosi Silk — Deep U Neck',
-        status: 'Stitching In-Progress',
-        placedDate: '01 Feb 2026',
-        estimatedDelivery: '14 Feb 2026',
-        tailor: 'Master Ramesh',
-        fabric: 'Raw Silk (Deep Red)',
-        steps: [
-            { name: 'Order Confirmed', status: 'completed', date: '01 Feb', icon: '✓', desc: 'Payment received, order confirmed.' },
-            { name: 'Tailor Assigned', status: 'completed', date: '01 Feb', icon: '👤', desc: 'Master Ramesh has been assigned.' },
-            { name: 'Fabric Dispatched', status: 'completed', date: '02 Feb', icon: '📦', desc: 'Raw Silk (Deep Red) dispatched from vendor.' },
-            { name: 'Cutting & Prep', status: 'completed', date: '04 Feb', icon: '✂️', desc: 'Pattern cutting completed.' },
-            { name: 'Stitching In Progress', status: 'active', date: 'Est: 08 Feb', icon: '🧵', desc: 'Front panels and side seams being stitched.' },
-            { name: 'Quality Check', status: 'pending', date: '', icon: '🔍', desc: 'Final QC and measurement verification.' },
-            { name: 'Shipped', status: 'pending', date: '', icon: '🚚', desc: 'Shipped via partner courier.' },
-            { name: 'Delivered', status: 'pending', date: '', icon: '🎉', desc: 'Delivered to your doorstep!' },
-        ],
-        liveFeed: [
-            { time: '2 hours ago', author: 'Master Ramesh', message: 'Front panel stitching completed. Starting embroidery placement now.', image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400' },
-            { time: '6 hours ago', author: 'Quality Team', message: 'Fabric quality verified — no defects. Approved for cutting.', image: null },
-            { time: '1 day ago', author: 'Master Ramesh', message: 'Pattern marked and cutting started. Following 14" sleeve length spec.', image: 'https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?w=400' },
-        ],
-        designSummary: {
-            neck: 'Deep U Neck',
-            sleeve: 'Elbow Length (14")',
-            back: 'Keyhole Back',
-            fabric: 'Raw Silk (Deep Red)',
-            work: 'Hand Zardosi + Antique Beads',
-            lining: 'Crepe Lining',
-        }
-    };
+    useEffect(() => {
+        const fetchOrderData = async () => {
+            try {
+                const res = await axios.get(`${CONFIG.API_URL}/orders/${id}`);
+                const data = res.data;
+                
+                // Map API status to step status
+                const statusMap = {
+                    'placed': 0,
+                    'accepted': 1,
+                    'stitching': 4,
+                    'in_production': 4,
+                    'ready': 5,
+                    'quality_check': 5,
+                    'shipped': 6,
+                    'delivered': 7
+                };
+
+                const currentStepIndex = statusMap[data.status] || 0;
+
+                const steps = [
+                    { name: 'Order Confirmed', icon: '✓', desc: 'Payment received, order confirmed.' },
+                    { name: 'Tailor Assigned', icon: '👤', desc: `${data.tailor_name || 'Artisan'} has been assigned.` },
+                    { name: 'Fabric Dispatched', icon: '📦', desc: 'Fabric dispatched from vendor.' },
+                    { name: 'Cutting & Prep', icon: '✂️', desc: 'Pattern cutting completed.' },
+                    { name: 'Stitching In Progress', icon: '🧵', desc: 'Front panels and side seams being stitched.' },
+                    { name: 'Quality Check', icon: '🔍', desc: 'Final QC and measurement verification.' },
+                    { name: 'Shipped', icon: '🚚', desc: 'Shipped via partner courier.' },
+                    { name: 'Delivered', icon: '🎉', desc: 'Delivered to your doorstep!' },
+                ].map((step, idx) => ({
+                    ...step,
+                    status: idx < currentStepIndex ? 'completed' : idx === currentStepIndex ? 'active' : 'pending',
+                    date: idx <= currentStepIndex ? (idx === 0 ? new Date(data.created_at).toLocaleDateString() : '') : ''
+                }));
+
+                const firstItem = data.items?.[0] || {};
+                const designSummary = firstItem.customization_details || {};
+                
+                setOrder({
+                    id: data.id,
+                    total: data.total_amount,
+                    designName: firstItem.design_name || 'Custom Blouse',
+                    status: data.status.charAt(0).toUpperCase() + data.status.slice(1).replace('_', ' '),
+                    placedDate: new Date(data.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                    estimatedDelivery: data.deadline ? new Date(data.deadline).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Pending',
+                    tailor: data.tailor_name || 'Not assigned',
+                    fabric: designSummary.fabric || 'Selected Fabric',
+                    steps: steps,
+                    liveFeed: (data.history || []).map(h => ({
+                        time: new Date(h.created_at).toLocaleString(),
+                        author: h.changed_by_name || 'System',
+                        message: h.comments || `Status updated to ${h.new_status}`,
+                        image: null
+                    })),
+                    designSummary: designSummary,
+                    images: [firstItem.design_image || 'https://via.placeholder.com/300']
+                });
+            } catch (err) {
+                console.error("Fetch Error:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrderData();
+    }, [id]);
+
+    useEffect(() => {
+        const socket = io(CONFIG.API_URL.replace('/api', ''), {
+            transports: ['websocket']
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected to socket server');
+            socket.emit('join_order', id);
+        });
+
+        socket.on('status_update', (data) => {
+            console.log('Live status update received:', data);
+            if (data.orderId === id) {
+                // Trigger a refresh or manually update state
+                // Refreshing is safer to get full updated object including history
+                window.location.reload(); 
+                // Alternatively, find the step and update it if you want zero-refresh UI
+            }
+        });
+
+        socket.on('new_message', (message) => {
+            if (message.order_id === id) {
+                setOrder(prev => ({
+                    ...prev,
+                    liveFeed: [
+                        {
+                            time: new Date(message.created_at).toLocaleString(),
+                            author: 'Artisan',
+                            message: message.message_text,
+                            image: message.attachment_url
+                        },
+                        ...prev.liveFeed
+                    ]
+                }));
+            }
+        });
+
+        return () => socket.disconnect();
+    }, [id]);
 
     const handleAlterationSubmit = () => {
         alert(`Alteration request submitted!\nType: ${alterationType}\nDetails: ${alterationNote}`);
@@ -50,8 +129,13 @@ const OrderTracking = () => {
         setAlterationNote('');
     };
 
+    if (loading) return <div className="loading-state">Loading your order details...</div>;
+    if (!order) return <div className="error-state">Order not found. <Link to="/dashboard">Back to Dashboard</Link></div>;
+
     const activeStepIndex = order.steps.findIndex(s => s.status === 'active');
-    const progressPct = Math.round(((activeStepIndex + 0.5) / order.steps.length) * 100);
+    const progressPct = activeStepIndex === -1 && order.steps.every(s => s.status === 'completed') 
+        ? 100 
+        : Math.round(((activeStepIndex === -1 ? 0 : activeStepIndex + 0.5) / order.steps.length) * 100);
 
     return (
         <>
@@ -125,16 +209,17 @@ const OrderTracking = () => {
                                 ))}
                             </div>
                             <div className="design-preview-row">
-                                <img src="https://images.unsplash.com/photo-1594938298603-c8148c47e957?w=300" alt="Front View" />
-                                <img src="https://images.unsplash.com/photo-1620799140408-ed5341cd2431?w=300" alt="Back View" />
+                                {order.images.map((img, idx) => (
+                                    <img key={idx} src={img} alt={`Preview ${idx}`} />
+                                ))}
                             </div>
                         </div>
 
                         {/* Live Work Feed */}
                         <div className="td-card feed-card">
-                            <h3>📸 Live Work Feed</h3>
+                            <h3>📸 Status Updates</h3>
                             <div className="live-feed">
-                                {order.liveFeed.map((item, i) => (
+                                {order.liveFeed.length > 0 ? order.liveFeed.map((item, i) => (
                                     <div key={i} className="feed-item">
                                         <span className="feed-time">{item.time}</span>
                                         <div className="feed-body">
@@ -144,7 +229,7 @@ const OrderTracking = () => {
                                             )}
                                         </div>
                                     </div>
-                                ))}
+                                )) : <p style={{color: '#999', fontStyle: 'italic'}}>No updates yet.</p>}
                             </div>
                         </div>
 
@@ -206,7 +291,7 @@ const OrderTracking = () => {
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Upload Photo (Optional)</label>
-                                <div className="upload-zone-small">
+                                <div className="upload-zone-small" style={{minHeight: '100px'}}>
                                     <span>📷</span>
                                     <p>Click to upload</p>
                                 </div>
